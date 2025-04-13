@@ -42,19 +42,19 @@ const Hero = () => {
             Fast, secure, and rewarding for all student and public events.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-            <Link to="/events" className="btn-primary flex items-center justify-center gap-2 animate-pulse-light">
-              <span>Explore Events</span>
+            <Link to="/auth?mode=signup&role=user" className="btn-primary flex items-center justify-center gap-2 animate-pulse-light">
+              <span>Join Now</span>
               <ArrowRight size={18} />
             </Link>
-            <Link to="/how-it-works" className="btn-secondary flex items-center justify-center gap-2">
-              <span>How It Works</span>
+            <Link to="/auth?mode=signup&role=organizer" className="btn-secondary flex items-center justify-center gap-2">
+              <span>Organize Events</span>
             </Link>
           </div>
         </div>
         <div className="relative hidden md:block">
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
           <img 
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" 
+            src="public/lovable-uploads/57e0eac2-019e-4bb4-8bc8-94eb92282994.png" 
             alt="Students at an event" 
             className="rounded-2xl shadow-lg relative z-10 object-cover h-full max-h-[500px] w-full animate-float"
           />

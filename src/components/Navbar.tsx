@@ -39,7 +39,7 @@ const Navbar = () => {
           <Link to="/tickets" className="font-medium hover:text-primary transition-colors">My Tickets</Link>
           <Link to="/map" className="font-medium hover:text-primary transition-colors">Map</Link>
           <Link to="/support" className="font-medium hover:text-primary transition-colors">Support</Link>
-          <Link to="/login" className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-4 py-2 transition-all duration-300">
+          <Link to="/auth" className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-4 py-2 transition-all duration-300">
             <User size={18} />
             <span>Login</span>
           </Link>
@@ -65,7 +65,7 @@ const Navbar = () => {
           <Link to="/tickets" className="font-medium py-2 hover:text-primary transition-colors">My Tickets</Link>
           <Link to="/map" className="font-medium py-2 hover:text-primary transition-colors">Map</Link>
           <Link to="/support" className="font-medium py-2 hover:text-primary transition-colors">Support</Link>
-          <Link to="/login" className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-4 py-2 transition-all duration-300">
+          <Link to="/auth" className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-4 py-2 transition-all duration-300">
             <User size={18} />
             <span>Login</span>
           </Link>
