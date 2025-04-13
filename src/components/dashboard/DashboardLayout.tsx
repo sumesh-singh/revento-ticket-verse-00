@@ -1,19 +1,23 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Calendar, BarChart2, User, Ticket, Star, MapPin, MessageSquare, PlusCircle, LogOut, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   userRole: 'user' | 'organizer';
-  onToggleRole: () => void;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole, onToggleRole }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  
   const isActive = (path: string) => location.pathname.includes(path);
 
   const userNavItems = [
@@ -31,6 +35,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole, o
   ];
 
   const navItems = userRole === 'user' ? userNavItems : organizerNavItems;
+  
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50" data-role={userRole}>
@@ -48,28 +61,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole, o
               </Link>
               
               <div className="w-full mb-2">
-                <div className="role-switch w-full p-1 bg-gray-100 rounded-full flex">
+                <div className="w-full p-1 bg-gray-100 rounded-full flex">
                   <button 
                     className={cn(
-                      "w-1/2 text-sm font-medium py-2 rounded-full transition-all duration-300 focus:outline-none",
+                      "w-full text-sm font-medium py-2 rounded-full transition-all duration-300 focus:outline-none",
                       userRole === 'user' 
                         ? "bg-primary text-white shadow-md" 
-                        : "text-gray-500 hover:text-gray-700"
+                        : "bg-purple-600 text-white shadow-md"
                     )}
-                    onClick={userRole === 'organizer' ? onToggleRole : undefined}
                   >
-                    User
-                  </button>
-                  <button 
-                    className={cn(
-                      "w-1/2 text-sm font-medium py-2 rounded-full transition-all duration-300 focus:outline-none",
-                      userRole === 'organizer' 
-                        ? "bg-purple-600 text-white shadow-md" 
-                        : "text-gray-500 hover:text-gray-700"
-                    )}
-                    onClick={userRole === 'user' ? onToggleRole : undefined}
-                  >
-                    Organizer
+                    {userRole === 'user' ? 'User Dashboard' : 'Organizer Dashboard'}
                   </button>
                 </div>
               </div>
@@ -120,11 +121,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole, o
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/">
-                        <LogOut className="h-4 w-4" />
-                        <span>Sign Out</span>
-                      </Link>
+                    <SidebarMenuButton onClick={handleLogout}>
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>

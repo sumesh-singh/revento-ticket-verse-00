@@ -18,29 +18,36 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Checkbox } from '@/components/ui/checkbox';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import { useForm } from 'react-hook-form';
 import AuthIllustration from '@/components/AuthIllustration';
+import { useAuth } from '@/context/AuthContext';
 
 type UserRole = 'user' | 'organizer';
-type AuthMode = 'login' | 'signup' | 'otp-verify' | 'forgot-password';
+type AuthMode = 'login' | 'signup' | 'forgot-password';
 
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login, isAuthenticated } = useAuth();
   const [role, setRole] = useState<UserRole>('user');
   const [mode, setMode] = useState<AuthMode>('login');
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [otpValue, setOtpValue] = useState("");
   const [recoverOpen, setRecoverOpen] = useState(false);
   const [recoverEmail, setRecoverEmail] = useState("");
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
   const watchPassword = watch("password", "");
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   // Effect to initialize from query params if any
   useEffect(() => {
@@ -69,18 +76,25 @@ const Auth = () => {
       setIsFormSubmitting(false);
       
       if (mode === 'login') {
-        // For demo: validate credentials and redirect
+        // Create a mock user object based on the form data
+        const userData = {
+          id: '123',
+          name: data.email.split('@')[0] || 'User',
+          email: data.email,
+          role: role,
+          rewardPoints: role === 'user' ? 750 : 0,
+          avatarUrl: 'https://source.unsplash.com/random/100x100/?person'
+        };
+        
+        // Use the login function from auth context
+        login('mock-token-' + Date.now(), userData);
+        
         toast({
           title: "Welcome back!",
           description: `You have successfully logged in as a ${role}.`,
         });
         
-        // If organizer needs OTP verification
-        if (role === 'organizer') {
-          setMode('otp-verify');
-        } else {
-          navigate('/dashboard');
-        }
+        navigate('/dashboard');
       } else if (mode === 'signup') {
         // For demo: check if email exists
         if (data.email === 'existing@example.com') {
@@ -92,31 +106,25 @@ const Auth = () => {
           return;
         }
         
+        // Create a mock user object
+        const userData = {
+          id: '123',
+          name: data.fullName || data.email.split('@')[0],
+          email: data.email,
+          role: role,
+          rewardPoints: role === 'user' ? 250 : 0,
+          avatarUrl: 'https://source.unsplash.com/random/100x100/?person'
+        };
+        
+        // Use the login function from auth context
+        login('mock-token-' + Date.now(), userData);
+        
         toast({
           title: "Account created!",
           description: `Your ${role} account has been created successfully.`,
         });
         
-        if (role === 'organizer') {
-          setMode('otp-verify');
-        } else {
-          navigate('/dashboard');
-        }
-      } else if (mode === 'otp-verify') {
-        // Verify OTP
-        if (otpValue === "123456") {
-          toast({
-            title: "OTP Verified!",
-            description: "Your account has been verified successfully.",
-          });
-          navigate('/dashboard');
-        } else {
-          toast({
-            title: "Invalid OTP",
-            description: "Please enter the correct OTP sent to your email.",
-            variant: "destructive",
-          });
-        }
+        navigate('/dashboard');
       }
     }, 1500);
   };
@@ -459,50 +467,6 @@ const Auth = () => {
           </form>
         );
         
-      case 'otp-verify':
-        return (
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full">
-            <div className="space-y-4">
-              <div className="space-y-2 text-center">
-                <h3 className="text-lg font-medium">Verification Required</h3>
-                <p className="text-sm text-gray-500">
-                  Please enter the 6-digit code sent to your email
-                </p>
-              </div>
-              
-              <div className="flex justify-center py-4">
-                <InputOTP
-                  maxLength={6}
-                  value={otpValue}
-                  onChange={(value) => setOtpValue(value)}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-sm text-gray-500">
-                  Didn't receive a code?{" "}
-                  <Button type="button" variant="link" className="p-0">
-                    Resend
-                  </Button>
-                </p>
-              </div>
-            </div>
-            
-            <Button type="submit" className="w-full" disabled={isFormSubmitting || otpValue.length < 6}>
-              {isFormSubmitting ? "Verifying..." : "Verify"}
-            </Button>
-          </form>
-        );
-        
       default:
         return null;
     }
@@ -522,9 +486,9 @@ const Auth = () => {
                 {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Join Revento' : 'Verify Your Account'}
               </h1>
               <p className="text-gray-600">
-                {mode === 'otp-verify' 
-                  ? 'Complete the verification process to continue' 
-                  : 'Earn rewards for every win in events & hackathons!'}
+                {mode === 'login' || mode === 'signup' 
+                  ? 'Earn rewards for every win in events & hackathons!' 
+                  : 'Complete the verification process to continue'}
               </p>
             </div>
             

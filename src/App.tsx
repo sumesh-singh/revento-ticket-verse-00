@@ -11,6 +11,11 @@ import Auth from "./pages/Auth";
 import Rewards from "./pages/Rewards";
 import Dashboard from "./pages/Dashboard";
 import ScrollToTop from "./components/ScrollToTop";
+import Events from "./pages/Events";
+import Support from "./pages/Support";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +31,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/rewards" element={<Rewards />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

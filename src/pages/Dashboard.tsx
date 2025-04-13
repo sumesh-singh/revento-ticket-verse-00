@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import UserDashboard from '@/components/dashboard/UserDashboard';
 import OrganizerDashboard from '@/components/dashboard/OrganizerDashboard';
@@ -13,17 +13,39 @@ import OrganizerAnalytics from '@/components/dashboard/organizer/OrganizerAnalyt
 import OrganizerAnnouncements from '@/components/dashboard/organizer/OrganizerAnnouncements';
 import OrganizerProfile from '@/components/dashboard/organizer/OrganizerProfile';
 import EventCreation from '@/components/dashboard/organizer/EventCreation';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
-  // This would be determined by auth in a real app
-  const [userRole, setUserRole] = useState<'user' | 'organizer'>('user');
+  const { isAuthenticated, user, loading } = useAuth();
+  const navigate = useNavigate();
   
-  const toggleRole = () => {
-    setUserRole(prev => prev === 'user' ? 'organizer' : 'user');
-  };
+  // Use the actual user role from context instead of a local state
+  const userRole = user?.role || 'user';
+  
+  // Redirect to login if not authenticated and not loading
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to access the dashboard.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+    }
+  }, [isAuthenticated, loading, navigate]);
+  
+  // Show loading or redirect to auth while checking authentication
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
-    <DashboardLayout userRole={userRole} onToggleRole={toggleRole}>
+    <DashboardLayout userRole={userRole}>
       <Routes>
         {/* Default dashboard route */}
         <Route path="/" element={
