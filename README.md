@@ -1,8 +1,49 @@
-# Welcome to your Lovable project
+
+# Welcome to your Lovable project - Revento Ticket Verse
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/749e1702-ef26-453b-946a-67b7a33a0780
+
+## Running this application locally
+
+To run this application on your local machine, follow these steps:
+
+```sh
+# Step 1: Make sure you have Node.js installed
+# You can download it from https://nodejs.org/
+
+# Step 2: Install the necessary dependencies
+npm install
+
+# Step 3: Start the development server
+npm run dev
+```
+
+The application should now be running at http://localhost:8080
+
+## Troubleshooting
+
+If you encounter the error "'vite' is not recognized as an internal or external command", try these solutions:
+
+1. Use npx to run Vite directly:
+```sh
+npx vite
+```
+
+2. Check if node_modules/.bin is in your PATH:
+```sh
+# On Windows
+set PATH=%PATH%;%CD%\node_modules\.bin
+
+# On macOS/Linux
+export PATH=$PATH:./node_modules/.bin
+```
+
+3. Try installing Vite globally:
+```sh
+npm install -g vite
+```
 
 ## How can I edit this code?
 
@@ -19,22 +60,6 @@ Changes made via Lovable will be committed automatically to this repo.
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
 
 **Edit a file directly in GitHub**
 
