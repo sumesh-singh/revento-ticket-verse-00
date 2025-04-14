@@ -1,11 +1,89 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, BarChart2, MessageSquare, Users, ChevronRight, PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const OrganizerDashboard = () => {
+  const [events, setEvents] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([
+    {
+      action: "New ticket purchase",
+      event: "Tech Conference 2025",
+      time: "2 hours ago"
+    },
+    {
+      action: "Announcement published",
+      event: "Developer Hackathon",
+      time: "Yesterday"
+    },
+    {
+      action: "Event schedule updated",
+      event: "AI Summit",
+      time: "2 days ago"
+    },
+    {
+      action: "New review (5 stars)",
+      event: "Tech Conference 2025",
+      time: "3 days ago"
+    }
+  ]);
+
+  useEffect(() => {
+    const savedEvents = JSON.parse(localStorage.getItem('organizer_events') || '[]');
+    
+    if (savedEvents.length === 0) {
+      const defaultEvents = [
+        {
+          id: 1,
+          name: "Tech Conference 2025",
+          date: "Apr 15, 2025",
+          attendees: "248 Registered",
+          status: "Published"
+        },
+        {
+          id: 2,
+          name: "Developer Hackathon",
+          date: "May 12, 2025",
+          attendees: "156 Registered",
+          status: "Draft"
+        },
+        {
+          id: 3,
+          name: "AI Summit",
+          date: "Jun 20, 2025",
+          attendees: "89 Registered",
+          status: "Published"
+        }
+      ];
+      setEvents(defaultEvents);
+    } else {
+      const formattedEvents = savedEvents.map(event => ({
+        id: event.id,
+        name: event.title || event.name,
+        date: event.date ? new Date(event.date).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }) : 'No date',
+        attendees: `${event.salesCount || 0} Registered`,
+        status: event.status.charAt(0).toUpperCase() + event.status.slice(1)
+      }));
+      
+      setEvents(formattedEvents.slice(0, 3));
+      
+      if (savedEvents.length > 0 && savedEvents[0].createdAt) {
+        const latestEvent = savedEvents[0];
+        const newActivity = {
+          action: "New event created",
+          event: latestEvent.title || latestEvent.name,
+          time: "Just now"
+        };
+        setRecentActivity([newActivity, ...recentActivity.slice(0, 3)]);
+      }
+    }
+  }, []);
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -23,7 +101,7 @@ const OrganizerDashboard = () => {
           title="Managed Events"
           description="Your active and upcoming events"
           icon={<Calendar className="w-5 h-5" />}
-          value="3 Active"
+          value={`${events.length} Active`}
           linkTo="/dashboard/organizer/events"
           color="bg-purple-50"
           iconColor="text-purple-500"
@@ -93,48 +171,38 @@ const OrganizerDashboard = () => {
             <CardDescription>Events you're organizing</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  name: "Tech Conference 2025",
-                  date: "Apr 15, 2025",
-                  attendees: "248 Registered",
-                  status: "Published"
-                },
-                {
-                  name: "Developer Hackathon",
-                  date: "May 12, 2025",
-                  attendees: "156 Registered",
-                  status: "Draft"
-                },
-                {
-                  name: "AI Summit",
-                  date: "Jun 20, 2025",
-                  attendees: "89 Registered",
-                  status: "Published"
-                }
-              ].map((event, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border hover:shadow-md transition-all duration-300">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{event.name}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        event.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {event.status}
-                      </span>
+            {events.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground mb-3">You haven't created any events yet</p>
+                <Button asChild size="sm">
+                  <Link to="/dashboard/organizer/create-event">Create Your First Event</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {events.map((event, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border hover:shadow-md transition-all duration-300">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium">{event.name}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          event.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {event.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{event.date} • {event.attendees}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{event.date} • {event.attendees}</p>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/dashboard/organizer/events">
+                        <span className="sr-only">View event</span>
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/dashboard/organizer/events">
-                      <span className="sr-only">View event</span>
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button variant="outline" asChild className="w-full">
@@ -151,28 +219,7 @@ const OrganizerDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[
-              {
-                action: "New ticket purchase",
-                event: "Tech Conference 2025",
-                time: "2 hours ago"
-              },
-              {
-                action: "Announcement published",
-                event: "Developer Hackathon",
-                time: "Yesterday"
-              },
-              {
-                action: "Event schedule updated",
-                event: "AI Summit",
-                time: "2 days ago"
-              },
-              {
-                action: "New review (5 stars)",
-                event: "Tech Conference 2025",
-                time: "3 days ago"
-              }
-            ].map((activity, index) => (
+            {recentActivity.map((activity, index) => (
               <div key={index} className="flex items-center gap-4 p-3 bg-white rounded-lg border hover:shadow-md transition-all duration-300">
                 <div className="w-2 h-2 rounded-full bg-purple-500"></div>
                 <div>

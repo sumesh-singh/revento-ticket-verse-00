@@ -1,10 +1,104 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Clock, User, Upload, Save, PlusCircle, Info, HelpCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const EventCreation = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: '',
+    date: '',
+    time: '',
+    endDate: '',
+    endTime: '',
+    location: '',
+    category: '',
+    description: '',
+    price: '',
+    quantity: '',
+    saleEnds: '',
+    capacity: '',
+    organizer: 'techevents',
+    // Publishing options
+    visibility: 'draft',
+    enableRegistration: false,
+    showOnHomepage: false,
+    allowSocialSharing: false,
+    // Additional settings
+    collectAttendeeDetails: true,
+    sendConfirmationEmails: true,
+    enableWaitlist: false
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData({ ...formData, [name]: checked });
+  };
+
+  const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, visibility: e.target.value });
+  };
+
+  const handleSaveDraft = () => {
+    submitEvent('draft');
+  };
+
+  const handlePublish = () => {
+    submitEvent('published');
+  };
+
+  const submitEvent = (status: string) => {
+    if (!formData.title) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide an event title before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      // In a real app, you would save this to a database
+      const newEvent = {
+        ...formData,
+        id: Date.now(),
+        status,
+        salesCount: 0,
+        viewCount: 0,
+        image: "/placeholder.svg",
+        createdAt: new Date().toISOString()
+      };
+
+      // Get existing events from localStorage or create empty array
+      const existingEvents = JSON.parse(localStorage.getItem('organizer_events') || '[]');
+      
+      // Add new event
+      localStorage.setItem('organizer_events', JSON.stringify([newEvent, ...existingEvents]));
+
+      toast({
+        title: status === 'published' ? "Event Published" : "Draft Saved",
+        description: `Your event "${formData.title}" has been ${status === 'published' ? 'published' : 'saved as a draft'}.`,
+        variant: "default",
+      });
+
+      setIsSubmitting(false);
+      navigate('/dashboard/organizer/events');
+    }, 1000);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -28,6 +122,8 @@ const EventCreation = () => {
                     type="text"
                     className="w-full p-2 border rounded-md"
                     placeholder="e.g., Tech Conference 2025"
+                    value={formData.title}
+                    onChange={handleInputChange}
                   />
                 </div>
                 
@@ -43,6 +139,8 @@ const EventCreation = () => {
                       id="date"
                       type="date"
                       className="w-full p-2 border rounded-md"
+                      value={formData.date}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div>
@@ -56,6 +154,8 @@ const EventCreation = () => {
                       id="time"
                       type="time"
                       className="w-full p-2 border rounded-md"
+                      value={formData.time}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -72,6 +172,8 @@ const EventCreation = () => {
                       id="endDate"
                       type="date"
                       className="w-full p-2 border rounded-md"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div>
@@ -85,6 +187,8 @@ const EventCreation = () => {
                       id="endTime"
                       type="time"
                       className="w-full p-2 border rounded-md"
+                      value={formData.endTime}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -101,12 +205,19 @@ const EventCreation = () => {
                     type="text"
                     className="w-full p-2 border rounded-md"
                     placeholder="e.g., Convention Center, 123 Main St"
+                    value={formData.location}
+                    onChange={handleInputChange}
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="category" className="block text-sm font-medium mb-1">Category</label>
-                  <select id="category" className="w-full p-2 border rounded-md">
+                  <select 
+                    id="category" 
+                    className="w-full p-2 border rounded-md"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                  >
                     <option value="">Select a category</option>
                     <option value="technology">Technology</option>
                     <option value="business">Business</option>
@@ -123,6 +234,8 @@ const EventCreation = () => {
                     rows={4}
                     className="w-full p-2 border rounded-md"
                     placeholder="Describe your event..."
+                    value={formData.description}
+                    onChange={handleInputChange}
                   ></textarea>
                   <div className="mt-1 flex items-center gap-1">
                     <Info className="w-3 h-3 text-blue-500" />
@@ -157,6 +270,8 @@ const EventCreation = () => {
                         type="number"
                         className="w-full p-2 border rounded-md"
                         placeholder="0.00"
+                        value={formData.price}
+                        onChange={handleInputChange}
                       />
                     </div>
                     <div>
@@ -166,6 +281,8 @@ const EventCreation = () => {
                         type="number"
                         className="w-full p-2 border rounded-md"
                         placeholder="100"
+                        value={formData.quantity}
+                        onChange={handleInputChange}
                       />
                     </div>
                     <div>
@@ -174,6 +291,8 @@ const EventCreation = () => {
                         id="saleEnds"
                         type="date"
                         className="w-full p-2 border rounded-md"
+                        value={formData.saleEnds}
+                        onChange={handleInputChange}
                       />
                     </div>
                   </div>
@@ -228,7 +347,14 @@ const EventCreation = () => {
             <CardContent>
               <div className="space-y-4">
                 <label className="flex items-center space-x-2">
-                  <input type="radio" name="visibility" className="h-4 w-4" defaultChecked />
+                  <input 
+                    type="radio" 
+                    name="visibility" 
+                    value="draft"
+                    className="h-4 w-4" 
+                    checked={formData.visibility === 'draft'}
+                    onChange={handleRadioChange}
+                  />
                   <span>
                     <div className="font-medium">Draft</div>
                     <div className="text-xs text-muted-foreground">Save but don't publish yet</div>
@@ -236,7 +362,14 @@ const EventCreation = () => {
                 </label>
                 
                 <label className="flex items-center space-x-2">
-                  <input type="radio" name="visibility" className="h-4 w-4" />
+                  <input 
+                    type="radio" 
+                    name="visibility" 
+                    value="published"
+                    className="h-4 w-4" 
+                    checked={formData.visibility === 'published'}
+                    onChange={handleRadioChange}
+                  />
                   <span>
                     <div className="font-medium">Publish Now</div>
                     <div className="text-xs text-muted-foreground">Make event visible immediately</div>
@@ -244,7 +377,14 @@ const EventCreation = () => {
                 </label>
                 
                 <label className="flex items-center space-x-2">
-                  <input type="radio" name="visibility" className="h-4 w-4" />
+                  <input 
+                    type="radio" 
+                    name="visibility" 
+                    value="scheduled"
+                    className="h-4 w-4" 
+                    checked={formData.visibility === 'scheduled'}
+                    onChange={handleRadioChange}
+                  />
                   <span>
                     <div className="font-medium">Schedule</div>
                     <div className="text-xs text-muted-foreground">Set a future publish date</div>
@@ -253,17 +393,35 @@ const EventCreation = () => {
                 
                 <div className="mt-4 pt-4 border-t">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="h-4 w-4" />
+                    <input 
+                      type="checkbox" 
+                      name="enableRegistration"
+                      className="h-4 w-4" 
+                      checked={formData.enableRegistration}
+                      onChange={handleCheckboxChange}
+                    />
                     <span className="text-sm">Enable event registration</span>
                   </label>
                   
                   <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" className="h-4 w-4" />
+                    <input 
+                      type="checkbox" 
+                      name="showOnHomepage"
+                      className="h-4 w-4" 
+                      checked={formData.showOnHomepage}
+                      onChange={handleCheckboxChange}
+                    />
                     <span className="text-sm">Show on homepage</span>
                   </label>
                   
                   <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" className="h-4 w-4" />
+                    <input 
+                      type="checkbox" 
+                      name="allowSocialSharing"
+                      className="h-4 w-4" 
+                      checked={formData.allowSocialSharing}
+                      onChange={handleCheckboxChange}
+                    />
                     <span className="text-sm">Allow social sharing</span>
                   </label>
                 </div>
@@ -296,12 +454,19 @@ const EventCreation = () => {
                     type="number"
                     className="w-full p-2 border rounded-md"
                     placeholder="Max attendees"
+                    value={formData.capacity}
+                    onChange={handleInputChange}
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="organizer" className="block text-sm font-medium mb-1">Organizer</label>
-                  <select id="organizer" className="w-full p-2 border rounded-md">
+                  <select 
+                    id="organizer" 
+                    className="w-full p-2 border rounded-md"
+                    value={formData.organizer}
+                    onChange={handleInputChange}
+                  >
                     <option value="techevents">TechEvents Inc.</option>
                   </select>
                 </div>
@@ -310,17 +475,35 @@ const EventCreation = () => {
                   <h3 className="font-medium text-sm mb-2">Registration Settings</h3>
                   
                   <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" className="h-4 w-4" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      name="collectAttendeeDetails"
+                      className="h-4 w-4" 
+                      checked={formData.collectAttendeeDetails}
+                      onChange={handleCheckboxChange}
+                    />
                     <span className="text-sm">Collect attendee details</span>
                   </label>
                   
                   <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" className="h-4 w-4" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      name="sendConfirmationEmails"
+                      className="h-4 w-4" 
+                      checked={formData.sendConfirmationEmails}
+                      onChange={handleCheckboxChange}
+                    />
                     <span className="text-sm">Send confirmation emails</span>
                   </label>
                   
                   <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" className="h-4 w-4" />
+                    <input 
+                      type="checkbox" 
+                      name="enableWaitlist"
+                      className="h-4 w-4" 
+                      checked={formData.enableWaitlist}
+                      onChange={handleCheckboxChange}
+                    />
                     <span className="text-sm">Enable waitlist</span>
                   </label>
                 </div>
@@ -331,11 +514,20 @@ const EventCreation = () => {
       </div>
       
       <div className="flex justify-end gap-4">
-        <Button variant="outline">
+        <Button 
+          variant="outline" 
+          onClick={handleSaveDraft}
+          disabled={isSubmitting}
+        >
           <Save className="w-4 h-4 mr-2" />
           <span>Save Draft</span>
         </Button>
-        <Button>Publish Event</Button>
+        <Button 
+          onClick={handlePublish}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Processing...' : 'Publish Event'}
+        </Button>
       </div>
     </div>
   );
