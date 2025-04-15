@@ -50,7 +50,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Ticket styling */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes gradient-shift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
@@ -104,7 +104,7 @@ const Index = () => {
           opacity: 1;
           transform: translateY(0);
         }
-      `}</style>
+      `}} />
       
       <Navbar />
       <main>
