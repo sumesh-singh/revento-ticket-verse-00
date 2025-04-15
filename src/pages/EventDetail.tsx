@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TicketDisplay from '../components/TicketDisplay';
 import EventRegistration from '../components/EventRegistration';
+import TicketPurchase from '../components/TicketPurchase';
 import { Button } from '@/components/ui/button';
 import { 
   Calendar, 
@@ -38,12 +39,41 @@ const EventDetail = () => {
     attendees: 248,
     organizer: "Tech Events Ltd",
     image: "https://source.unsplash.com/random/1200x600/?tech,conference",
-    ticketTypes: [
-      { id: 1, name: "General Admission", price: "$99", available: true },
-      { id: 2, name: "VIP Access", price: "$299", available: true },
-      { id: 3, name: "Workshop Bundle", price: "$199", available: false }
-    ]
   };
+
+  // Mock ticket tier data - in a real app, fetch this from your API/CMS
+  const ticketTiers = [
+    {
+      id: "standard",
+      name: "Standard Admission",
+      price: 99,
+      currency: "USD",
+      description: "General access to all main event areas and sessions",
+      benefits: ["Access to all sessions", "Coffee and snacks", "Conference materials"],
+      available: true,
+      maxPerTransaction: 5
+    },
+    {
+      id: "vip",
+      name: "VIP Access",
+      price: 299,
+      currency: "USD",
+      description: "Premium experience with exclusive perks and priority access",
+      benefits: ["Priority seating", "Exclusive networking event", "Speaker meet & greet", "Premium swag bag"],
+      available: true,
+      maxPerTransaction: 3
+    },
+    {
+      id: "workshop",
+      name: "Workshop Bundle",
+      price: 199,
+      currency: "USD",
+      description: "Standard admission plus access to all workshop sessions",
+      benefits: ["Standard admission benefits", "Hands-on workshops", "Certificate of completion"],
+      available: false,
+      maxPerTransaction: 2
+    }
+  ];
   
   const handleGetTicket = () => {
     if (!isAuthenticated) {
@@ -156,45 +186,16 @@ const EventDetail = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-24">
                 {!showRegistration && (
-                  <div className="bg-white rounded-xl p-6 shadow-md mb-6">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center">
-                      <Ticket className="h-5 w-5 mr-2 text-primary" />
-                      Get your ticket
-                    </h2>
-                    
-                    <div className="space-y-4 mb-6">
-                      {event.ticketTypes.map(ticket => (
-                        <div 
-                          key={ticket.id}
-                          className={`border rounded-lg p-4 ${ticket.available ? 'hover:border-primary cursor-pointer' : 'opacity-60'}`}
-                        >
-                          <div className="flex justify-between">
-                            <span className="font-medium">{ticket.name}</span>
-                            <span className="font-semibold">{ticket.price}</span>
-                          </div>
-                          {!ticket.available && (
-                            <p className="text-sm text-red-500 mt-1">Sold Out</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <Button 
-                      className="w-full mb-3"
-                      onClick={handleGetTicket}
-                    >
-                      Register Now
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      className="w-full flex items-center justify-center"
-                      onClick={handleShareEvent}
-                    >
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share Event
-                    </Button>
-                  </div>
+                  <TicketPurchase
+                    event={{
+                      id: event.id || "",
+                      title: event.title,
+                      date: event.date,
+                      location: event.location,
+                      image: event.image
+                    }}
+                    ticketTiers={ticketTiers}
+                  />
                 )}
                 
                 {/* Ticket Preview */}
