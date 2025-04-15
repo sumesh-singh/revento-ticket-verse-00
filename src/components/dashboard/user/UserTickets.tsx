@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Calendar, Download } from 'lucide-react';
+import { Share2, Calendar, Download, QrCode as QrCodeIcon } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { toast } from '@/hooks/use-toast';
 
 const UserTickets = () => {
   const dummyTickets = [
@@ -73,6 +74,38 @@ interface TicketCardProps {
 }
 
 const TicketCard = ({ ticket }: TicketCardProps) => {
+  const [qrLoaded, setQrLoaded] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
+
+  // Handle ticket sharing functionality
+  const handleShareTicket = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `My Ticket to ${ticket.eventName}`,
+        text: `Check out my ticket to ${ticket.eventName}!`,
+        url: window.location.href,
+      }).catch(error => console.log('Error sharing', error));
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied",
+        description: "Ticket link copied to clipboard",
+      });
+    }
+  };
+
+  // Generate QR code URL for this ticket
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticket.ticketNumber)}&color=6366F1&bgcolor=FFFFFF`;
+
+  useEffect(() => {
+    // Show QR code after a short delay for better UX
+    const timer = setTimeout(() => {
+      setShowQrCode(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg group event-card">
       <div className="relative h-48">
@@ -119,12 +152,24 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
           <HoverCard>
             <HoverCardTrigger asChild>
               <div className="w-full flex justify-center">
-                <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 100 100" className="w-24 h-24">
-                    <path d="M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="black" strokeWidth="2" />
-                    <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fontSize="8">QR Code</text>
-                    <text x="50" y="60" textAnchor="middle" dominantBaseline="middle" fontSize="6">{ticket.ticketNumber}</text>
-                  </svg>
+                <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden relative">
+                  {showQrCode ? (
+                    <>
+                      {!qrLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <QrCodeIcon className="h-12 w-12 text-gray-300 animate-pulse" />
+                        </div>
+                      )}
+                      <img 
+                        src={qrCodeUrl}
+                        alt={`QR Code for ${ticket.ticketNumber}`}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${qrLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        onLoad={() => setQrLoaded(true)}
+                      />
+                    </>
+                  ) : (
+                    <QrCodeIcon className="h-12 w-12 text-gray-300" />
+                  )}
                 </div>
               </div>
             </HoverCardTrigger>
@@ -148,7 +193,7 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
       </CardContent>
       
       <CardFooter className="grid grid-cols-3 gap-2">
-        <Button variant="outline" size="sm" className="w-full">
+        <Button variant="outline" size="sm" className="w-full" onClick={handleShareTicket}>
           <Share2 className="h-4 w-4 mr-1" />
           <span>Share</span>
         </Button>
