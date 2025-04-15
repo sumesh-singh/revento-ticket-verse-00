@@ -12,6 +12,7 @@ import Rewards from "./pages/Rewards";
 import Dashboard from "./pages/Dashboard";
 import ScrollToTop from "./components/ScrollToTop";
 import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 import Support from "./pages/Support";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/support" element={<Support />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
