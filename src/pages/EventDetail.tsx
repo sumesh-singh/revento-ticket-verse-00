@@ -26,21 +26,6 @@ const EventDetail = () => {
   const { isAuthenticated, user } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
   
-  // Mock event data - in a real app, fetch this from your backend
-  const event = {
-    id: eventId,
-    title: "Tech Conference 2025",
-    date: "April 15, 2025",
-    time: "10:00 AM - 5:00 PM",
-    location: "Convention Center, Downtown",
-    description: "Join us for the most anticipated tech event of the year! Connect with industry leaders, discover cutting-edge technologies, and expand your network.",
-    category: "Technology",
-    price: "$99",
-    attendees: 248,
-    organizer: "Tech Events Ltd",
-    image: "https://source.unsplash.com/random/1200x600/?tech,conference",
-  };
-
   // Mock ticket tier data - in a real app, fetch this from your API/CMS
   const ticketTiers = [
     {
@@ -74,6 +59,22 @@ const EventDetail = () => {
       maxPerTransaction: 2
     }
   ];
+  
+  // Mock event data - in a real app, fetch this from your backend
+  const event = {
+    id: eventId,
+    title: "Tech Conference 2025",
+    date: "April 15, 2025",
+    time: "10:00 AM - 5:00 PM",
+    location: "Convention Center, Downtown",
+    description: "Join us for the most anticipated tech event of the year! Connect with industry leaders, discover cutting-edge technologies, and expand your network.",
+    category: "Technology",
+    price: "$99",
+    attendees: 248,
+    organizer: "Tech Events Ltd",
+    image: "https://source.unsplash.com/random/1200x600/?tech,conference",
+    ticketTiers: ticketTiers // Adding the ticketTiers property to the event object
+  };
   
   const handleGetTicket = () => {
     if (!isAuthenticated) {
