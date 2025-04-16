@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -31,7 +30,7 @@ type AuthMode = 'login' | 'signup' | 'forgot-password';
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { login, register: registerUser, isAuthenticated } = useAuth();
   const [role, setRole] = useState<UserRole>('user');
   const [mode, setMode] = useState<AuthMode>('login');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -68,26 +67,12 @@ const Auth = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = async (data: any) => {
     setIsFormSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsFormSubmitting(false);
-      
+    try {
       if (mode === 'login') {
-        // Create a mock user object based on the form data
-        const userData = {
-          id: '123',
-          name: data.email.split('@')[0] || 'User',
-          email: data.email,
-          role: role,
-          rewardPoints: role === 'user' ? 750 : 0,
-          avatarUrl: 'https://source.unsplash.com/random/100x100/?person'
-        };
-        
-        // Use the login function from auth context
-        login('mock-token-' + Date.now(), userData);
+        await login(data.email, data.password);
         
         toast({
           title: "Welcome back!",
@@ -103,21 +88,11 @@ const Auth = () => {
             description: "Please use a different email or login with this one.",
             variant: "destructive",
           });
+          setIsFormSubmitting(false);
           return;
         }
         
-        // Create a mock user object
-        const userData = {
-          id: '123',
-          name: data.fullName || data.email.split('@')[0],
-          email: data.email,
-          role: role,
-          rewardPoints: role === 'user' ? 250 : 0,
-          avatarUrl: 'https://source.unsplash.com/random/100x100/?person'
-        };
-        
-        // Use the login function from auth context
-        login('mock-token-' + Date.now(), userData);
+        await registerUser(data.email, data.password);
         
         toast({
           title: "Account created!",
@@ -126,7 +101,11 @@ const Auth = () => {
         
         navigate('/dashboard');
       }
-    }, 1500);
+    } catch (error) {
+      console.error('Authentication error:', error);
+    } finally {
+      setIsFormSubmitting(false);
+    }
   };
 
   const handlePasswordRecovery = (e: React.FormEvent) => {

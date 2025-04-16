@@ -10,7 +10,7 @@ import {
 import { auth } from '../config/firebase';
 import { toast } from '@/hooks/use-toast';
 
-type User = {
+export type User = {
   id: string;
   name: string;
   email: string;

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -136,7 +137,7 @@ const EventDetail = () => {
                 {!showRegistration && (
                   <TicketPurchase
                     event={{
-                      id: event.id || "",
+                      id: event.id,
                       title: event.title,
                       date: event.date,
                       location: event.location,
