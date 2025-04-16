@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -7,58 +6,49 @@ import Footer from '../components/Footer';
 import TicketDisplay from '../components/TicketDisplay';
 import EventRegistration from '../components/EventRegistration';
 import TicketPurchase from '../components/TicketPurchase';
-import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  Clock, 
-  Ticket, 
-  Share2, 
-  ArrowLeft 
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import EventDetailsSection from '../components/event/EventDetailsSection';
+import EventActions from '../components/event/EventActions';
 import { toast } from '@/hooks/use-toast';
+
+// Mock ticket tier data - in a real app, fetch this from your API/CMS
+const ticketTiers = [
+  {
+    id: "standard",
+    name: "Standard Admission",
+    price: 99,
+    currency: "USD",
+    description: "General access to all main event areas and sessions",
+    benefits: ["Access to all sessions", "Coffee and snacks", "Conference materials"],
+    available: true,
+    maxPerTransaction: 5
+  },
+  {
+    id: "vip",
+    name: "VIP Access",
+    price: 299,
+    currency: "USD",
+    description: "Premium experience with exclusive perks and priority access",
+    benefits: ["Priority seating", "Exclusive networking event", "Speaker meet & greet", "Premium swag bag"],
+    available: true,
+    maxPerTransaction: 3
+  },
+  {
+    id: "workshop",
+    name: "Workshop Bundle",
+    price: 199,
+    currency: "USD",
+    description: "Standard admission plus access to all workshop sessions",
+    benefits: ["Standard admission benefits", "Hands-on workshops", "Certificate of completion"],
+    available: false,
+    maxPerTransaction: 2
+  }
+];
 
 const EventDetail = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
-  
-  // Mock ticket tier data - in a real app, fetch this from your API/CMS
-  const ticketTiers = [
-    {
-      id: "standard",
-      name: "Standard Admission",
-      price: 99,
-      currency: "USD",
-      description: "General access to all main event areas and sessions",
-      benefits: ["Access to all sessions", "Coffee and snacks", "Conference materials"],
-      available: true,
-      maxPerTransaction: 5
-    },
-    {
-      id: "vip",
-      name: "VIP Access",
-      price: 299,
-      currency: "USD",
-      description: "Premium experience with exclusive perks and priority access",
-      benefits: ["Priority seating", "Exclusive networking event", "Speaker meet & greet", "Premium swag bag"],
-      available: true,
-      maxPerTransaction: 3
-    },
-    {
-      id: "workshop",
-      name: "Workshop Bundle",
-      price: 199,
-      currency: "USD",
-      description: "Standard admission plus access to all workshop sessions",
-      benefits: ["Standard admission benefits", "Hands-on workshops", "Certificate of completion"],
-      available: false,
-      maxPerTransaction: 2
-    }
-  ];
   
   // Mock event data - in a real app, fetch this from your backend
   const event = {
@@ -116,13 +106,7 @@ const EventDetail = () => {
       
       <main className="flex-1 pt-20">
         <div className="container mx-auto px-4 py-8">
-          <button 
-            onClick={() => navigate('/events')}
-            className="flex items-center text-primary mb-6 hover:underline"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to all events
-          </button>
+          <EventActions eventTitle={event.title} />
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left column - Event details */}
@@ -137,43 +121,7 @@ const EventDetail = () => {
                 />
               </div>
               
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge>{event.category}</Badge>
-                  <Badge variant="outline" className="text-green-600 bg-green-50">
-                    {event.price}
-                  </Badge>
-                </div>
-                
-                <h1 className="text-4xl font-bold mb-4">{event.title}</h1>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center text-gray-600">
-                    <Calendar className="h-5 w-5 mr-2 flex-shrink-0" />
-                    <span>{event.date}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="h-5 w-5 mr-2 flex-shrink-0" />
-                    <span>{event.time}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="h-5 w-5 mr-2 flex-shrink-0" />
-                    <span>{event.location}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-gray-600">
-                    <Users className="h-5 w-5 mr-2 flex-shrink-0" />
-                    <span>{event.attendees} attendees</span>
-                  </div>
-                </div>
-                
-                <div className="prose max-w-none">
-                  <h2 className="text-2xl font-semibold mb-4">About the Event</h2>
-                  <p className="text-gray-700">{event.description}</p>
-                </div>
-              </div>
+              <EventDetailsSection event={event} />
 
               {showRegistration ? (
                 <EventRegistration 
