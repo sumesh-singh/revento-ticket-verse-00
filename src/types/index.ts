@@ -44,4 +44,5 @@ export interface Event {
   organizer: string;
   image: string;
   ticketTiers: TicketTier[];
+  ticketTypes: TicketType[];
 }
