@@ -9,9 +9,9 @@ import TicketPurchase from '../components/TicketPurchase';
 import EventDetailsSection from '../components/event/EventDetailsSection';
 import EventActions from '../components/event/EventActions';
 import { toast } from '@/hooks/use-toast';
+import { Event, TicketTier } from '@/types';
 
-// Mock ticket tier data - in a real app, fetch this from your API/CMS
-const ticketTiers = [
+const ticketTiers: TicketTier[] = [
   {
     id: "standard",
     name: "Standard Admission",
@@ -50,9 +50,8 @@ const EventDetail = () => {
   const { isAuthenticated, user } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
   
-  // Mock event data - in a real app, fetch this from your backend
-  const event = {
-    id: eventId,
+  const event: Event = {
+    id: eventId || "",
     title: "Tech Conference 2025",
     date: "April 15, 2025",
     time: "10:00 AM - 5:00 PM",
@@ -63,9 +62,9 @@ const EventDetail = () => {
     attendees: 248,
     organizer: "Tech Events Ltd",
     image: "https://source.unsplash.com/random/1200x600/?tech,conference",
-    ticketTiers: ticketTiers // Adding the ticketTiers property to the event object
+    ticketTiers: ticketTiers
   };
-  
+
   const handleGetTicket = () => {
     if (!isAuthenticated) {
       toast({

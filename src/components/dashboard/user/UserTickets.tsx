@@ -3,24 +3,22 @@ import { QrCode as QrCodeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import TicketCard, { Ticket } from './TicketCard';
+import TicketCard from './TicketCard';
 import TicketSkeleton from './TicketSkeleton';
+import { Ticket, TicketStatus, PaymentMethod } from '@/types';
 
 const UserTickets = () => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // This would be replaced with an actual API call in a real implementation
   useEffect(() => {
     const loadTickets = async () => {
       setIsLoading(true);
       try {
-        // Simulate API call to fetch user tickets
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Mock ticket data
-        const dummyTickets = [
+        const dummyTickets: Ticket[] = [
           {
             id: 1,
             eventName: "Tech Conference 2025",
@@ -89,7 +87,7 @@ const UserTickets = () => {
     
     loadTickets();
   }, []);
-  
+
   return (
     <div className="space-y-6">
       <div>
