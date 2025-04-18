@@ -11,6 +11,15 @@ import EventDetailsSection from '../components/event/EventDetailsSection';
 import EventActions from '../components/event/EventActions';
 import { toast } from '@/hooks/use-toast';
 import { Event, TicketTier } from '@/types';
+import type { TicketTier } from '../types'; 
+
+type Event = {
+  // ... other props
+  ticketTypes: TicketTier[];
+  id: number;
+  name: string;
+  description: string;
+};
 
 const ticketTiers: TicketTier[] = [
   {
