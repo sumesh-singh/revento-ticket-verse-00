@@ -1,3 +1,4 @@
+
 export type PaymentMethod = 'crypto' | 'stellar' | 'fiat';
 export type TicketStatus = 'upcoming' | 'attended' | 'cancelled';
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -11,15 +10,10 @@ import EventDetailsSection from '../components/event/EventDetailsSection';
 import EventActions from '../components/event/EventActions';
 import { toast } from '@/hooks/use-toast';
 import { Event, TicketTier } from '@/types';
-import type { TicketTier } from '../types'; 
 
-type Event = {
-  // ... other props
-  ticketTypes: TicketTier[];
-  id: number;
-  name: string;
-  description: string;
-};
+interface LocalEvent extends Omit<Event, 'id'> {
+  id: string | number;
+}
 
 const ticketTiers: TicketTier[] = [
   {
@@ -60,7 +54,7 @@ const EventDetail = () => {
   const { isAuthenticated, user } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
   
-  const event: Event = {
+  const event: LocalEvent = {
     id: eventId || "",
     title: "Tech Conference 2025",
     date: "April 15, 2025",
@@ -83,7 +77,6 @@ const EventDetail = () => {
         description: "Please log in to continue with registration",
         variant: "destructive",
       });
-      // Save the current event to sessionStorage for redirect after login
       sessionStorage.setItem('pendingEventRegistration', eventId);
       navigate('/auth');
       return;
@@ -101,7 +94,6 @@ const EventDetail = () => {
       })
       .catch(error => console.log('Error sharing', error));
     } else {
-      // Fallback for browsers that don't support the Web Share API
       navigator.clipboard.writeText(window.location.href);
       toast({
         title: "Link copied",
@@ -119,7 +111,6 @@ const EventDetail = () => {
           <EventActions eventTitle={event.title} />
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left column - Event details */}
             <div className="lg:col-span-2">
               <div className="rounded-xl overflow-hidden mb-6">
                 <img 
@@ -131,23 +122,22 @@ const EventDetail = () => {
                 />
               </div>
               
-              <EventDetailsSection event={event} />
+              <EventDetailsSection event={event as Event} />
 
               {showRegistration ? (
                 <EventRegistration 
-                  event={event}
+                  event={event as Event}
                   onCancel={() => setShowRegistration(false)}
                 />
               ) : null}
             </div>
             
-            {/* Right column - Ticket and registration */}
             <div className="lg:col-span-1">
               <div className="sticky top-24">
                 {!showRegistration && (
                   <TicketPurchase
                     event={{
-                      id: event.id,
+                      id: String(event.id),
                       title: event.title,
                       date: event.date,
                       location: event.location,
@@ -157,9 +147,8 @@ const EventDetail = () => {
                   />
                 )}
                 
-                {/* Ticket Preview */}
                 {isAuthenticated && !showRegistration && (
-                  <TicketDisplay event={event} />
+                  <TicketDisplay event={event as Event} />
                 )}
               </div>
             </div>
