@@ -15,6 +15,17 @@ interface LocalEvent extends Omit<Event, 'id'> {
   id: string | number;
 }
 
+type Event = {
+  // ...other props
+  ticketTypes: {
+    id: string;
+    name: string;
+    price: string;
+    available: boolean;
+  }[];
+};
+
+
 const ticketTiers: TicketTier[] = [
   {
     id: "standard",
