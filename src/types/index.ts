@@ -1,24 +1,5 @@
-
 export type PaymentMethod = 'crypto' | 'stellar' | 'fiat';
 export type TicketStatus = 'upcoming' | 'attended' | 'cancelled';
-
-export interface Ticket {
-  id: number;
-  eventName: string;
-  date: string;
-  time: string;
-  location: string;
-  ticketType: string;
-  ticketNumber: string;
-  status: TicketStatus;
-  image: string;
-  paymentMethod: PaymentMethod;
-  txHash: string | null;
-  ipfsCid: string | null;
-  blockchain: string | null;
-  tokenId: string | null;
-  purchaseDate: string;
-}
 
 export interface TicketTier {
   id: string;
@@ -44,5 +25,23 @@ export interface Event {
   organizer: string;
   image: string;
   ticketTiers: TicketTier[];
-  ticketTypes: TicketType[];
+  ticketTypes?: TicketTier[]; // Made optional to fix type error
+}
+
+export interface Ticket {
+  id: number;
+  eventName: string;
+  date: string;
+  time: string;
+  location: string;
+  ticketType: string;
+  ticketNumber: string;
+  status: TicketStatus;
+  image: string;
+  paymentMethod: PaymentMethod;
+  txHash: string | null;
+  ipfsCid: string | null;
+  blockchain: string | null;
+  tokenId: string | null;
+  purchaseDate: string;
 }

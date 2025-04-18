@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -63,7 +62,8 @@ const EventDetail = () => {
     attendees: 248,
     organizer: "Tech Events Ltd",
     image: "https://source.unsplash.com/random/1200x600/?tech,conference",
-    ticketTiers: ticketTiers
+    ticketTiers: ticketTiers,
+    ticketTypes: ticketTiers
   };
 
   const handleGetTicket = () => {
