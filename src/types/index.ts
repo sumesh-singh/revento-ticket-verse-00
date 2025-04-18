@@ -1,4 +1,3 @@
-
 export type PaymentMethod = 'crypto' | 'stellar' | 'fiat';
 export type TicketStatus = 'upcoming' | 'attended' | 'cancelled';
 
@@ -11,6 +10,13 @@ export interface TicketTier {
   benefits: string[];
   available: boolean;
   maxPerTransaction: number;
+}
+
+export interface TicketType {
+  id: string;
+  name: string;
+  price: string;
+  available: boolean;
 }
 
 export interface Event {
@@ -26,12 +32,7 @@ export interface Event {
   organizer: string;
   image: string;
   ticketTiers: TicketTier[];
-  ticketTypes?: {
-    id: string;
-    name: string;
-    price: string;
-    available: boolean;
-  }[];
+  ticketTypes?: TicketType[];
 }
 
 export interface Ticket {

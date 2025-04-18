@@ -11,21 +11,6 @@ import EventActions from '../components/event/EventActions';
 import { toast } from '@/hooks/use-toast';
 import { Event, TicketTier } from '@/types';
 
-interface LocalEvent extends Omit<Event, 'id'> {
-  id: string | number;
-}
-
-type Event = {
-  // ...other props
-  ticketTypes: {
-    id: string;
-    name: string;
-    price: string;
-    available: boolean;
-  }[];
-};
-
-
 const ticketTiers: TicketTier[] = [
   {
     id: "standard",
@@ -62,10 +47,10 @@ const ticketTiers: TicketTier[] = [
 const EventDetail = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
   
-  const event: LocalEvent = {
+  const event: Event = {
     id: eventId || "",
     title: "Tech Conference 2025",
     date: "April 15, 2025",
@@ -78,7 +63,12 @@ const EventDetail = () => {
     organizer: "Tech Events Ltd",
     image: "https://source.unsplash.com/random/1200x600/?tech,conference",
     ticketTiers: ticketTiers,
-    ticketTypes: ticketTiers
+    ticketTypes: ticketTiers.map(tier => ({
+      id: tier.id,
+      name: tier.name,
+      price: `$${tier.price}`,
+      available: tier.available
+    }))
   };
 
   const handleGetTicket = () => {
