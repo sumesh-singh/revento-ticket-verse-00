@@ -1,29 +1,21 @@
 
 import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS # Import CORS
+from flask_cors import CORS
 from groq import Groq
 from dotenv import load_dotenv
 
-load_dotenv() # Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for all routes, allowing frontend requests
+CORS(app)
 
-# --- SECURITY WARNING ---
-# Ensure GROQ_API_KEY is set as an environment variable
-# NEVER hardcode your API key in the code.
-# Use a .env file locally (add .env to .gitignore)
-# Set environment variables in your deployment environment.
 api_key = os.environ.get("GROQ_API_KEY")
 if not api_key:
     print("Error: GROQ_API_KEY environment variable not set.")
-    # In a real app, you might want to exit or disable the chat feature
-    # For this example, we'll allow it to run but Groq calls will fail.
     client = None
 else:
      client = Groq(api_key=api_key)
-
 
 @app.route('/api/chat', methods=['POST'])
 def chat_handler():
@@ -35,16 +27,42 @@ def chat_handler():
         return jsonify({"error": "Missing 'question' or 'context' in request"}), 400
 
     user_question = data['question']
-    event_context = data['context'] # Context scraped from the frontend HTML
+    event_context = data['context']
 
-    # --- Basic Prompt Engineering ---
-    # Instruct the model to use ONLY the provided context.
-    system_prompt = (
-        "You are a helpful assistant for the 'Awesome Event Management' website. "
-        "Answer the user's question based *only* on the following event information provided. "
-        "If the information is not in the context, clearly state that you don't have information about it from the provided text. "
-        "Do not make up event details or information not present in the context. Be concise."
-    )
+    system_prompt = """
+    You are a knowledgeable assistant for Revento, a modern event management and ticketing platform. Here's what you know:
+
+    Core Features:
+    1. Event Creation & Management
+       - Users can create and manage events
+       - Support for various event types (conferences, workshops, concerts, etc.)
+       - Customizable event pages with details, images, and schedules
+
+    2. Ticketing System
+       - Multiple ticket tiers (Standard, VIP, Workshop bundles)
+       - Secure blockchain-based ticket verification
+       - Digital wallet integration for ticket storage
+       - Support for different payment methods (crypto, fiat, Stellar)
+
+    3. User Features
+       - Personal dashboards for event management
+       - Ticket purchase and storage
+       - Event favorites and reminders
+       - Attendance history and rewards program
+
+    4. Platform Benefits
+       - Instant ticketing with blockchain verification
+       - Interactive venue maps
+       - 24/7 AI support
+       - Rewards system for regular attendees
+
+    When answering:
+    - Use ONLY the provided context from the webpage combined with this knowledge
+    - For specific event details, rely solely on the context provided
+    - If information isn't available, clearly state that
+    - Be friendly and professional
+    - Keep responses concise and focused
+    """
 
     prompt = f"""
 System: {system_prompt}
@@ -63,29 +81,22 @@ Answer:
         chat_completion = client.chat.completions.create(
             messages=[
                 {
-                    "role": "user", # We combine system, context, and user question into one user message for simplicity here
+                    "role": "user",
                     "content": prompt,
                 }
             ],
-            # Choose a model available via Groq, e.g., llama3-8b-8192 or mixtral-8x7b-32768
             model="llama3-8b-8192",
-            temperature=0.2, # Lower temperature for more factual, less creative responses
+            temperature=0.2,
             max_tokens=150,
-            # top_p=1, # Defaults often work well
-            # stop=None, # Defaults often work well
-            # stream=False, # Set to True for streaming responses
         )
 
         ai_response = chat_completion.choices[0].message.content
         return jsonify({"answer": ai_response})
 
     except Exception as e:
-        print(f"Error calling Groq API: {e}") # Log error server-side
-        # Provide a generic error to the frontend for security
+        print(f"Error calling Groq API: {e}")
         return jsonify({"error": "An error occurred while processing your request."}), 500
 
 if __name__ == '__main__':
-    # Use 0.0.0.0 to be accessible on the network if needed,
-    # otherwise 127.0.0.1 is fine for local development.
-    # Debug=True is helpful for development but should be False in production.
     app.run(host='0.0.0.0', port=5001, debug=True)
+

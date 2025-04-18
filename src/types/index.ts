@@ -14,7 +14,7 @@ export interface TicketTier {
 }
 
 export interface Event {
-  id: string;
+  id: string | number;
   title: string;
   date: string;
   time: string;
@@ -26,7 +26,12 @@ export interface Event {
   organizer: string;
   image: string;
   ticketTiers: TicketTier[];
-  ticketTypes?: TicketTier[]; // Made optional to fix type error
+  ticketTypes?: {
+    id: string;
+    name: string;
+    price: string;
+    available: boolean;
+  }[];
 }
 
 export interface Ticket {
