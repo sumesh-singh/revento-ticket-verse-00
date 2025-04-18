@@ -4,7 +4,7 @@ import { Calendar, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export interface Event {
-  id: number;
+  id: string | number;  // Updated to accept both string and number
   name: string;
   date: string;
   location: string;
