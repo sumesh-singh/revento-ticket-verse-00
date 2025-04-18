@@ -20,11 +20,11 @@ export interface TicketType {
 }
 
 export interface Event {
-  id: string | number;
+  id: string;
   title: string;
+  location: string;
   date: string;
   time: string;
-  location: string;
   description: string;
   category: string;
   price: string;

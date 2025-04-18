@@ -1,6 +1,6 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, Clock } from "lucide-react";
+import GoogleMap from "../GoogleMap";
 
 interface EventDetailsSectionProps {
   event: {
@@ -52,6 +52,11 @@ const EventDetailsSection = ({ event }: EventDetailsSectionProps) => {
       <div className="prose max-w-none">
         <h2 className="text-2xl font-semibold mb-4">About the Event</h2>
         <p className="text-gray-700">{event.description}</p>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Location</h2>
+        <GoogleMap location={event.location} className="w-full" />
       </div>
     </div>
   );
