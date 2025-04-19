@@ -11,28 +11,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
-
-interface Event {
-  id: string | undefined;
-  title: string;
-  ticketTypes: Array<{
-    id: number;
-    name: string;
-    price: string;
-    available: boolean;
-  }>;
-}
+import StellarPayment from './payment/StellarPayment';
+import { Event, Ticket, TicketStatus, PaymentMethod } from '@/types';
 
 interface EventRegistrationProps {
   event: Event;
   onCancel: () => void;
+  onSuccess?: (ticket: Ticket) => void;
 }
 
-const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
+const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProps) => {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [createdTicket, setCreatedTicket] = useState<Ticket | null>(null);
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -48,23 +42,26 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
   const totalSteps = 3;
   const progress = (currentStep / totalSteps) * 100;
   
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleCheckboxChange = (name, checked) => {
+  const handleCheckboxChange = (name: string, checked: boolean) => {
     setFormData(prev => ({ ...prev, [name]: checked }));
   };
   
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleTeamMemberChange = (index, value) => {
+  const handleTeamMemberChange = (index: number, value: string) => {
     const updatedTeamMembers = [...formData.teamMembers];
     updatedTeamMembers[index] = value;
-    setFormData(prev => ({ ...prev, teamMembers: updatedTeamMembers }));
+    setFormData(prev => ({
+      ...prev, 
+      teamMembers: updatedTeamMembers
+    }));
   };
   
   const addTeamMember = () => {
@@ -74,7 +71,7 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
     }));
   };
   
-  const removeTeamMember = (index) => {
+  const removeTeamMember = (index: number) => {
     const updatedTeamMembers = formData.teamMembers.filter((_, i) => i !== index);
     setFormData(prev => ({
       ...prev,
@@ -125,37 +122,110 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
     }
   };
   
-  const handleSubmit = async () => {
+  const handleProceedToPayment = () => {
     if (!validateCurrentStep()) return;
     
     setIsLoading(true);
     
-    // Simulate API call to register for event
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setIsComplete(true);
-      
+    // Create a ticket record but mark it as pending payment
+    const ticketTypeObj = event.ticketTypes.find(t => t.id.toString() === formData.ticketType);
+    
+    if (!ticketTypeObj) {
       toast({
-        title: "Registration successful!",
-        description: "Your ticket has been emailed to you",
-      });
-      
-      // In a real app, you would make an API call to submit registration data:
-      // await registerForEvent(event.id, formData);
-      
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "Please try again later",
+        title: "Invalid Ticket Type",
+        description: "Please select a valid ticket type",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
+      return;
     }
+    
+    // Simulate API call
+    setTimeout(() => {
+      const newTicket: Ticket = {
+        id: Date.now(),
+        eventName: event.title,
+        date: event.date,
+        time: event.time,
+        location: event.location,
+        ticketType: ticketTypeObj.name,
+        ticketNumber: `TIXPEND-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+        status: 'upcoming' as TicketStatus,
+        image: event.image,
+        paymentMethod: 'stellar' as PaymentMethod,
+        txHash: null,
+        ipfsCid: null,
+        blockchain: 'Stellar',
+        tokenId: null,
+        purchaseDate: new Date().toISOString(),
+        placeId: event.placeId,
+        coordinates: event.coordinates
+      };
+      
+      setCreatedTicket(newTicket);
+      setShowPayment(true);
+      setIsLoading(false);
+    }, 1500);
+  };
+  
+  const handlePaymentComplete = (transactionId: string) => {
+    if (!createdTicket) return;
+    
+    setIsLoading(true);
+    
+    // Update the ticket with the transaction details
+    const finalTicket: Ticket = {
+      ...createdTicket,
+      txHash: transactionId,
+      ticketNumber: `TIX-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
+    };
+    
+    // Simulate API call to finalize ticket
+    setTimeout(() => {
+      setCreatedTicket(finalTicket);
+      setIsComplete(true);
+      setIsLoading(false);
+      
+      // Add ticket to local storage for demo
+      const existingTickets = JSON.parse(localStorage.getItem('user_tickets') || '[]');
+      localStorage.setItem('user_tickets', JSON.stringify([finalTicket, ...existingTickets]));
+      
+      if (onSuccess) {
+        onSuccess(finalTicket);
+      }
+    }, 1000);
+  };
+  
+  const handleCancelPayment = () => {
+    setShowPayment(false);
+  };
+  
+  const getSelectedTicketPrice = (): number => {
+    const ticketTier = event.ticketTiers.find(tier => tier.id === formData.ticketType);
+    return ticketTier ? ticketTier.price : 0;
   };
   
   const renderStepContent = () => {
+    if (showPayment) {
+      // Find the selected ticket tier
+      const ticketTier = event.ticketTiers.find(tier => tier.id === formData.ticketType);
+      const ticketPrice = ticketTier ? ticketTier.price : 0;
+      const ticketName = ticketTier ? ticketTier.name : 'Standard';
+      
+      return (
+        <StellarPayment
+          eventId={event.id}
+          eventName={event.title}
+          ticketType={ticketName}
+          price={ticketPrice}
+          currency="XLM"
+          userEmail={formData.email}
+          onPaymentComplete={handlePaymentComplete}
+          onCancel={handleCancelPayment}
+        />
+      );
+    }
+    
     switch (currentStep) {
       case 1:
         return (
@@ -208,11 +278,11 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
                     <SelectValue placeholder="Select ticket type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {event.ticketTypes
+                    {event.ticketTiers
                       .filter(ticket => ticket.available)
                       .map(ticket => (
-                        <SelectItem key={ticket.id} value={ticket.id.toString()}>
-                          {ticket.name} - {ticket.price}
+                        <SelectItem key={ticket.id} value={ticket.id}>
+                          {ticket.name} - ${ticket.price}
                         </SelectItem>
                       ))
                     }
@@ -282,7 +352,7 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
                 <p><strong>Email:</strong> {formData.email}</p>
                 <p><strong>Phone:</strong> {formData.phone}</p>
                 <p><strong>Ticket:</strong> {
-                  event.ticketTypes.find(t => t.id.toString() === formData.ticketType)?.name || 'Standard'
+                  event.ticketTiers.find(t => t.id === formData.ticketType)?.name || 'Standard'
                 }</p>
                 
                 {formData.dietaryRestrictions && (
@@ -310,7 +380,7 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
                 <Checkbox 
                   id="terms" 
                   checked={formData.agreedToTerms}
-                  onCheckedChange={(checked) => handleCheckboxChange('agreedToTerms', checked)}
+                  onCheckedChange={(checked) => handleCheckboxChange('agreedToTerms', !!checked)}
                 />
                 <label 
                   htmlFor="terms" 
@@ -326,6 +396,19 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
                 By proceeding, you confirm all provided information is accurate and you agree to the event's policies.
               </p>
             </div>
+            
+            <div className="p-4 border rounded-md">
+              <h4 className="font-medium mb-2">Payment Details</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                You will be redirected to complete payment via Stellar blockchain after confirming your registration.
+              </p>
+              <div className="flex justify-between items-center">
+                <span className="font-medium">Total:</span>
+                <span className="font-bold text-lg">
+                  ${getSelectedTicketPrice().toFixed(2)}
+                </span>
+              </div>
+            </div>
           </div>
         );
         
@@ -336,22 +419,24 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Register for {event.title}</CardTitle>
-        <div className="mt-2">
-          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
+      {!showPayment && !isComplete && (
+        <CardHeader>
+          <CardTitle>Register for {event.title}</CardTitle>
+          <div className="mt-2">
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+              <span>Personal Details</span>
+              <span>Event Details</span>
+              <span>Confirmation</span>
+            </div>
           </div>
-          <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-            <span>Personal Details</span>
-            <span>Event Details</span>
-            <span>Confirmation</span>
-          </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
+      )}
       
       <CardContent>
         {isComplete ? (
@@ -362,8 +447,13 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
             <h3 className="text-xl font-semibold">Registration Complete!</h3>
             <p className="text-muted-foreground">
               Thank you for registering for {event.title}. 
-              Your ticket has been emailed to you and is also available in your account.
+              Your blockchain ticket has been created and is available in your account.
             </p>
+            <div className="mt-4 p-4 border rounded-md text-sm">
+              <p><strong>Transaction ID:</strong></p>
+              <p className="font-mono break-all">{createdTicket?.txHash}</p>
+              <p className="mt-2"><strong>Ticket ID:</strong> {createdTicket?.ticketNumber}</p>
+            </div>
             <Button 
               className="mt-4" 
               onClick={onCancel}
@@ -376,7 +466,7 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
         )}
       </CardContent>
       
-      {!isComplete && (
+      {!showPayment && !isComplete && (
         <CardFooter className="flex justify-between">
           <Button 
             variant="outline" 
@@ -393,7 +483,7 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
             </Button>
           ) : (
             <Button 
-              onClick={handleSubmit}
+              onClick={handleProceedToPayment}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -402,7 +492,7 @@ const EventRegistration = ({ event, onCancel }: EventRegistrationProps) => {
                   Processing
                 </>
               ) : (
-                'Complete Registration'
+                'Proceed to Payment'
               )}
             </Button>
           )}

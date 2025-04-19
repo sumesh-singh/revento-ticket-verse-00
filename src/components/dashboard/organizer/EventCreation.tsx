@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Clock, User, Upload, Save, PlusCircle, Info, HelpCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Upload, Save, PlusCircle, Info, HelpCircle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import GoogleMap from '@/components/GoogleMap';
 
 const EventCreation = () => {
   const navigate = useNavigate();
@@ -30,10 +30,18 @@ const EventCreation = () => {
     // Additional settings
     collectAttendeeDetails: true,
     sendConfirmationEmails: true,
-    enableWaitlist: false
+    enableWaitlist: false,
+    // Location coordinates
+    placeId: '',
+    coordinates: {
+      lat: 40.7128, // Default to NYC
+      lng: -74.0060
+    }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const locationInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -55,6 +63,34 @@ const EventCreation = () => {
 
   const handlePublish = () => {
     submitEvent('published');
+  };
+
+  const handleLocationSelect = () => {
+    if (!formData.location.trim()) {
+      toast({
+        title: "Location Required",
+        description: "Please enter a location before selecting on map",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setShowLocationPicker(true);
+  };
+
+  const handleMapLocationUpdate = (placeId: string, coordinates: { lat: number, lng: number }) => {
+    setFormData({
+      ...formData,
+      placeId,
+      coordinates
+    });
+    
+    toast({
+      title: "Location Updated",
+      description: "Map location has been set successfully",
+    });
+    
+    setShowLocationPicker(false);
   };
 
   const submitEvent = (status: string) => {
@@ -200,14 +236,59 @@ const EventCreation = () => {
                       <span>Location</span>
                     </div>
                   </label>
-                  <input
-                    id="location"
-                    type="text"
-                    className="w-full p-2 border rounded-md"
-                    placeholder="e.g., Convention Center, 123 Main St"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      id="location"
+                      type="text"
+                      ref={locationInputRef}
+                      className="w-full p-2 border rounded-md"
+                      placeholder="e.g., Convention Center, 123 Main St"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                    />
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleLocationSelect}
+                      className="flex-shrink-0"
+                    >
+                      <MapPin className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {showLocationPicker && (
+                    <div className="mt-4 border rounded-md overflow-hidden">
+                      <div className="flex justify-between items-center p-2 bg-muted">
+                        <h3 className="text-sm font-medium">Select Location on Map</h3>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => setShowLocationPicker(false)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="h-[300px]">
+                        <GoogleMap 
+                          location={formData.location} 
+                          className="w-full h-full"
+                          onLocationSelect={handleMapLocationUpdate}
+                          interactive={true}
+                        />
+                      </div>
+                      <div className="p-2 text-xs text-muted-foreground">
+                        Click to drop a pin or search for a specific location
+                      </div>
+                    </div>
+                  )}
+                  
+                  {formData.placeId && !showLocationPicker && (
+                    <div className="mt-2 flex items-center text-sm text-green-600">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <span>Location pin set on map</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div>

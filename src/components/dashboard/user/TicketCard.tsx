@@ -2,27 +2,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Calendar, Download, QrCode as QrCodeIcon, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
+import { Share2, Calendar, Download, QrCode as QrCodeIcon, ExternalLink, Copy, CheckCircle2, MapPin } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { toast } from '@/hooks/use-toast';
-
-export interface Ticket {
-  id: number;
-  eventName: string;
-  date: string;
-  time: string;
-  location: string;
-  ticketType: string;
-  ticketNumber: string;
-  status: string;
-  image: string;
-  paymentMethod?: 'crypto' | 'stellar' | 'fiat';
-  txHash?: string | null;
-  ipfsCid?: string | null;
-  blockchain?: string | null;
-  tokenId?: string | null;
-  purchaseDate?: string;
-}
+import { Ticket } from '@/types';
+import GoogleMap from '@/components/GoogleMap';
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -32,6 +16,7 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
   const [qrLoaded, setQrLoaded] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   // Handle ticket sharing functionality
   const handleShareTicket = () => {
@@ -62,6 +47,11 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
       title: "Copied to clipboard",
       description: "Transaction hash copied",
     });
+  };
+
+  // Toggle map visibility
+  const toggleMap = () => {
+    setShowMap(!showMap);
   };
 
   // Generate QR code URL for this ticket
@@ -142,10 +132,34 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
       </CardHeader>
       
       <CardContent className="space-y-2">
-        <div>
-          <p className="text-sm text-muted-foreground">Location</p>
-          <p className="font-medium">{ticket.location}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">Location</p>
+            <p className="font-medium">{ticket.location}</p>
+          </div>
+          
+          {(ticket.placeId || ticket.coordinates) && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleMap}
+              className="flex items-center gap-1"
+            >
+              <MapPin className="h-3 w-3" />
+              <span>{showMap ? 'Hide Map' : 'Show Map'}</span>
+            </Button>
+          )}
         </div>
+        
+        {showMap && (ticket.location || ticket.coordinates) && (
+          <div className="mt-2 rounded-md overflow-hidden border h-[200px]">
+            <GoogleMap 
+              location={ticket.location} 
+              className="w-full h-full" 
+            />
+          </div>
+        )}
+        
         <div>
           <p className="text-sm text-muted-foreground">Ticket #</p>
           <p className="font-medium">{ticket.ticketNumber}</p>

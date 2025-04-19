@@ -44,10 +44,10 @@ const Hero = () => {
         className="container mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-12 items-center animate-on-scroll"
       >
         <div className="text-center md:text-left flex flex-col items-center md:items-start gap-6">
-          <h1 className="hero-title opacity-0 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
             Smart Access to <span className="bg-clip-text text-transparent bg-gradient-primary">Smarter Events!</span>
           </h1>
-          <p className="hero-subtext opacity-0 text-lg md:text-xl text-gray-700 max-w-xl">
+          <p className="text-lg md:text-xl text-gray-700 max-w-xl">
             Experience the future of event access with our wallet-based ticketing system. 
             Fast, secure, and rewarding for all student and public events.
           </p>
