@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { getMapStyles } from '@/utils/mapStyles';
@@ -7,6 +6,12 @@ interface UseGoogleMapProps {
   location: string;
   interactive?: boolean;
   onLocationSelect?: (placeId: string, coordinates: {lat: number, lng: number}) => void;
+}
+
+declare global {
+  interface Window {
+    initMap: () => void;
+  }
 }
 
 export const useGoogleMap = ({ 
