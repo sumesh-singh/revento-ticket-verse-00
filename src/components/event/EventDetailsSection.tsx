@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, Clock, Navigation, Bus, SquareParking } from "lucide-react";
 import GoogleMap from "../GoogleMap";

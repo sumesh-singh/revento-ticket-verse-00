@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -51,13 +52,13 @@ const EventDetail = () => {
   const [showRegistration, setShowRegistration] = useState(false);
   
   const ticketTypes: TicketType[] = ticketTiers.map(tier => ({
-    id: Number(tier.id),
+    id: parseInt(tier.id, 10) || Math.floor(Math.random() * 1000),
     name: tier.name,
     price: `$${tier.price}`,
     available: tier.available
   }));
   
-  const event: Partial<Event> = {
+  const event = {
     id: eventId || "",
     title: "Tech Conference 2025",
     date: "April 15, 2025",

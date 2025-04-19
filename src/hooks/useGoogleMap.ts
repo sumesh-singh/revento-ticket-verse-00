@@ -1,6 +1,7 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { getMapStyles } from '@/utils/mapStyles';
 
 interface UseGoogleMapProps {
   location: string;
@@ -130,7 +131,11 @@ export const useGoogleMap = ({ location }: UseGoogleMapProps) => {
 
     return () => {
       window.initMap = () => {};
-      map.current?.remove();
+      // Fix the 'remove' method that doesn't exist on Map
+      if (map.current) {
+        // Just set to null instead of calling remove
+        map.current = null;
+      }
     };
   }, [location]);
 

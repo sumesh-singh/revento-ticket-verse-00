@@ -14,7 +14,7 @@ export interface TicketTier {
 }
 
 export interface TicketType {
-  id: number;  // Changed from string to number
+  id: number;
   name: string;
   price: string;
   available: boolean;
@@ -33,7 +33,7 @@ export interface Event {
   organizer: string;
   image: string;
   ticketTiers: TicketTier[];
-  ticketTypes?: TicketType[];
+  ticketTypes: TicketType[];
   placeId?: string;
   coordinates?: {
     lat: number;
