@@ -1,3 +1,4 @@
+
 export type PaymentMethod = 'crypto' | 'stellar' | 'fiat';
 export type TicketStatus = 'upcoming' | 'attended' | 'cancelled';
 
@@ -33,6 +34,11 @@ export interface Event {
   image: string;
   ticketTiers: TicketTier[];
   ticketTypes?: TicketType[];
+  placeId?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface Ticket {
@@ -51,4 +57,9 @@ export interface Ticket {
   blockchain: string | null;
   tokenId: string | null;
   purchaseDate: string;
+  placeId?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }

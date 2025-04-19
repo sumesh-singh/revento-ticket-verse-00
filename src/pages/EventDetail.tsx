@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -9,7 +10,7 @@ import TicketPurchase from '../components/TicketPurchase';
 import EventDetailsSection from '../components/event/EventDetailsSection';
 import EventActions from '../components/event/EventActions';
 import { toast } from '@/hooks/use-toast';
-import { Event, TicketTier } from '@/types';
+import { Event, TicketTier, TicketType } from '@/types';
 
 const ticketTiers: TicketTier[] = [
   {
@@ -50,6 +51,14 @@ const EventDetail = () => {
   const { isAuthenticated } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
   
+  // Create ticket types from ticket tiers
+  const ticketTypes: TicketType[] = ticketTiers.map(tier => ({
+    id: tier.id,
+    name: tier.name,
+    price: `$${tier.price}`,
+    available: tier.available
+  }));
+  
   const event: Event = {
     id: eventId || "",
     title: "Tech Conference 2025",
@@ -63,12 +72,12 @@ const EventDetail = () => {
     organizer: "Tech Events Ltd",
     image: "https://source.unsplash.com/random/1200x600/?tech,conference",
     ticketTiers: ticketTiers,
-    ticketTypes: ticketTiers.map(tier => ({
-      id: tier.id,
-      name: tier.name,
-      price: `$${tier.price}`,
-      available: tier.available
-    }))
+    ticketTypes: ticketTypes,
+    placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4", // Example Google Place ID
+    coordinates: {
+      lat: 40.7128,
+      lng: -74.0060
+    }
   };
 
   const handleGetTicket = () => {
@@ -123,11 +132,11 @@ const EventDetail = () => {
                 />
               </div>
               
-              <EventDetailsSection event={event as Event} />
+              <EventDetailsSection event={event} />
 
               {showRegistration ? (
                 <EventRegistration 
-                  event={event as Event}
+                  event={event}
                   onCancel={() => setShowRegistration(false)}
                 />
               ) : null}
@@ -149,7 +158,7 @@ const EventDetail = () => {
                 )}
                 
                 {isAuthenticated && !showRegistration && (
-                  <TicketDisplay event={event as Event} />
+                  <TicketDisplay event={event} />
                 )}
               </div>
             </div>
