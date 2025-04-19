@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -51,9 +50,8 @@ const EventDetail = () => {
   const { isAuthenticated } = useAuth();
   const [showRegistration, setShowRegistration] = useState(false);
   
-  // Create ticket types from ticket tiers
   const ticketTypes: TicketType[] = ticketTiers.map(tier => ({
-    id: tier.id,
+    id: Number(tier.id),
     name: tier.name,
     price: `$${tier.price}`,
     available: tier.available

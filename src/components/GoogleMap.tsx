@@ -1,7 +1,6 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { MapPin, Navigation, ZoomIn, ZoomOut, Parking, Bus } from 'lucide-react';
+import { MapPin, Navigation, ZoomIn, ZoomOut, Bus, SquareParking } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface GoogleMapProps {
@@ -282,6 +281,13 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, className }) => {
           className="bg-white/90 hover:bg-white"
         >
           <Bus className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="bg-white/90 hover:bg-white"
+        >
+          <SquareParking className="h-4 w-4" />
         </Button>
       </div>
     </div>

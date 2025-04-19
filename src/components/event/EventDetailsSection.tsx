@@ -1,6 +1,5 @@
-
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Clock, Navigation, Bus, Parking } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, Navigation, Bus, SquareParking } from "lucide-react";
 import GoogleMap from "../GoogleMap";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -93,7 +92,7 @@ const EventDetailsSection = ({ event }: EventDetailsSectionProps) => {
           
           <div className="bg-muted rounded-lg p-4 flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-full">
-              <Parking className="h-6 w-6 text-primary" />
+              <SquareParking className="h-6 w-6 text-primary" />
             </div>
             <div>
               <h3 className="font-medium">Parking Available</h3>

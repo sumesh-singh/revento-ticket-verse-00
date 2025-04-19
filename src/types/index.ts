@@ -14,7 +14,7 @@ export interface TicketTier {
 }
 
 export interface TicketType {
-  id: string;
+  id: number;  // Changed from string to number
   name: string;
   price: string;
   available: boolean;
