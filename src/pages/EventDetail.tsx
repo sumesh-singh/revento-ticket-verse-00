@@ -57,7 +57,7 @@ const EventDetail = () => {
     available: tier.available
   }));
   
-  const event: Event = {
+  const event: Partial<Event> = {
     id: eventId || "",
     title: "Tech Conference 2025",
     date: "April 15, 2025",
@@ -71,7 +71,7 @@ const EventDetail = () => {
     image: "https://source.unsplash.com/random/1200x600/?tech,conference",
     ticketTiers: ticketTiers,
     ticketTypes: ticketTypes,
-    placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4", // Example Google Place ID
+    placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
     coordinates: {
       lat: 40.7128,
       lng: -74.0060
@@ -130,11 +130,11 @@ const EventDetail = () => {
                 />
               </div>
               
-              <EventDetailsSection event={event} />
+              <EventDetailsSection event={event as Event} />
 
               {showRegistration ? (
                 <EventRegistration 
-                  event={event}
+                  event={event as Event}
                   onCancel={() => setShowRegistration(false)}
                 />
               ) : null}
@@ -156,7 +156,7 @@ const EventDetail = () => {
                 )}
                 
                 {isAuthenticated && !showRegistration && (
-                  <TicketDisplay event={event} />
+                  <TicketDisplay event={event as Event} />
                 )}
               </div>
             </div>
