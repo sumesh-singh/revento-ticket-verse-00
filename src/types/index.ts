@@ -73,7 +73,7 @@ export interface TicketPurchaseProps {
     image: string;
   };
   ticketTiers: TicketTier[];
-  onGetTicket?: () => void;
+  onSuccess?: (ticketId: string) => void;
 }
 
 export interface RegistrationFormData {
@@ -84,4 +84,16 @@ export interface RegistrationFormData {
   dietaryRestrictions: string;
   teamMembers: string[];
   agreedToTerms: boolean;
+}
+
+// PaymentDetails interface for passing data to payment page
+export interface PaymentDetails {
+  eventId: string;
+  eventName: string;
+  ticketType: string;
+  price: number;
+  currency: string;
+  userEmail: string;
+  quantity?: number;
+  registrationData?: RegistrationFormData;
 }

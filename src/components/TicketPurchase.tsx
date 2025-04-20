@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,31 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { Loader2, Ticket, Shield, ArrowRight, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/badge';
-
-interface TicketTier {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  description: string;
-  benefits: string[];
-  available: boolean;
-  maxPerTransaction: number;
-}
-
-interface EventDetails {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  image: string;
-}
-
-interface TicketPurchaseProps {
-  event: EventDetails;
-  ticketTiers: TicketTier[];
-  onSuccess?: (ticketId: string) => void;
-}
+import { TicketPurchaseProps, TicketTier } from '@/types';
 
 const TicketPurchase = ({ event, ticketTiers, onSuccess }: TicketPurchaseProps) => {
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
@@ -73,27 +48,26 @@ const TicketPurchase = ({ event, ticketTiers, onSuccess }: TicketPurchaseProps) 
     setIsProcessing(true);
     
     try {
-      // This is a placeholder for the actual purchase logic
-      // In a real implementation, this would connect to your payment gateway
-      // and blockchain integration
+      // Instead of simulating a purchase, we'll redirect to the registration form
+      const selectedTicketInfo = ticketTiers.find(tier => tier.id === selectedTier);
       
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-      
-      // Generate a mock ticket ID - in reality this would come from your backend
-      const mockTicketId = `TIX-${Date.now().toString(36).toUpperCase()}`;
-      
-      toast({
-        title: "Purchase successful!",
-        description: "Your ticket has been added to your account",
-      });
-      
-      // Call the success callback if provided
-      if (onSuccess) {
-        onSuccess(mockTicketId);
+      if (!selectedTicketInfo) {
+        throw new Error("Selected ticket information not found");
       }
       
-      // Redirect to the user's tickets page
-      navigate('/dashboard/user/tickets');
+      navigate('/payment', {
+        state: {
+          paymentDetails: {
+            eventId: event.id,
+            eventName: event.title,
+            ticketType: selectedTicketInfo.name,
+            price: selectedTicketInfo.price,  // Pass as number
+            currency: selectedTicketInfo.currency,
+            userEmail: user?.email || '',
+            quantity: quantity
+          }
+        }
+      });
       
     } catch (error) {
       console.error('Purchase failed:', error);
@@ -102,7 +76,6 @@ const TicketPurchase = ({ event, ticketTiers, onSuccess }: TicketPurchaseProps) 
         description: "There was an error processing your purchase. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };

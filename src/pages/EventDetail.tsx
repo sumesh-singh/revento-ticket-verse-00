@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -152,7 +153,7 @@ const EventDetail = () => {
                       image: event.image
                     }}
                     ticketTiers={ticketTiers}
-                    onGetTicket={handleGetTicket}
+                    onSuccess={() => handleGetTicket()}
                   />
                 )}
                 
