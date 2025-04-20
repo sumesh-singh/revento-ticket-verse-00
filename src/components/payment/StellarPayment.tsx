@@ -11,7 +11,7 @@ interface StellarPaymentProps {
   eventId: string;
   eventName: string;
   ticketType: string;
-  price: number;
+  price: number;  // Ensure this is a number
   currency: string;
   userEmail: string;
   onPaymentComplete: (transactionId: string) => void;
@@ -22,7 +22,7 @@ const StellarPayment = ({
   eventId,
   eventName,
   ticketType,
-  price,
+  price,  // This is now explicitly a number
   currency,
   userEmail,
   onPaymentComplete,
