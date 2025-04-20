@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Event } from '@/types';
+import { Event, RegistrationFormData } from '@/types';
 import PersonalInfoStep from './PersonalInfoStep';
 import TeamInfoStep from './TeamInfoStep';
 import ConfirmationStep from './ConfirmationStep';
@@ -17,12 +17,13 @@ interface EventRegistrationProps {
 }
 
 const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProps) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const totalSteps = 3;
   const progress = (currentStep / totalSteps) * 100;
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegistrationFormData>({
     name: '',
     email: '',
     phone: '',
@@ -107,6 +108,40 @@ const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProp
     }
   };
 
+  const handleSubmit = () => {
+    if (!formData.agreedToTerms) {
+      toast({
+        title: "Terms Agreement Required",
+        description: "Please agree to the terms and conditions to continue",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedTier = event.ticketTiers.find(tier => tier.id === formData.ticketType);
+    if (!selectedTier) {
+      toast({
+        title: "Invalid Ticket Type",
+        description: "Please select a valid ticket type",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigate('/payment', {
+      state: {
+        paymentDetails: {
+          eventId: event.id,
+          eventName: event.title,
+          ticketType: selectedTier.name,
+          price: selectedTier.price,
+          currency: selectedTier.currency,
+          userEmail: formData.email,
+        }
+      }
+    });
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -175,7 +210,7 @@ const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProp
           </Button>
         ) : (
           <Button 
-            onClick={onCancel}
+            onClick={handleSubmit}
             disabled={isProcessing}
           >
             {isProcessing ? (
