@@ -8,6 +8,7 @@ import HowItWorks from '../components/HowItWorks';
 import MapPreview from '../components/MapPreview';
 import Chatbot from '../components/Chatbot';
 import Footer from '../components/Footer';
+import Events from '../components/Events';
 import { useAuth } from '@/context/AuthContext';
 
 const Index = () => {
@@ -111,6 +112,7 @@ const Index = () => {
         <Hero />
         <Features />
         <EventsPreview isLoggedIn={isAuthenticated} />
+        <Events />
         <HowItWorks />
         <MapPreview />
       </main>

@@ -54,10 +54,10 @@ const Navbar = () => {
     }`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center transition-transform group-hover:scale-110">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center transition-transform group-hover:scale-110">
             <span className="text-white font-bold text-xl">R</span>
           </div>
-          <span className="font-display font-bold text-xl bg-clip-text text-transparent bg-gradient-primary">
+          <span className="font-display font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
             Revento
           </span>
         </Link>
@@ -125,10 +125,10 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/rewards" className="font-medium hover:text-primary transition-colors">How It Works</Link>
-              <Link to="/auth" className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-4 py-2 transition-all duration-300 group">
+              <Link to="/auth" className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-4 py-2 transition-colors">
                 <User size={18} />
                 <span>Login</span>
-                <span className="w-0 overflow-hidden group-hover:w-auto transition-all duration-300 group-hover:ml-1">/ Signup</span>
+                <span className="hidden group-hover:inline ml-1">/&nbsp;Signup</span>
               </Link>
             </>
           )}

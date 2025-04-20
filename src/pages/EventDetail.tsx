@@ -52,7 +52,7 @@ const EventDetail = () => {
   const [showRegistration, setShowRegistration] = useState(false);
   
   const ticketTypes: TicketType[] = ticketTiers.map(tier => ({
-    id: parseInt(tier.id, 10) || Math.floor(Math.random() * 1000),
+    id: typeof tier.id === 'string' ? parseInt(tier.id, 36) % 1000 : Math.floor(Math.random() * 1000),
     name: tier.name,
     price: `$${tier.price}`,
     available: tier.available
@@ -153,6 +153,7 @@ const EventDetail = () => {
                       image: event.image
                     }}
                     ticketTiers={ticketTiers}
+                    onGetTicket={handleGetTicket}
                   />
                 )}
                 

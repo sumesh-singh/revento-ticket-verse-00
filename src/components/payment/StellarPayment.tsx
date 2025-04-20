@@ -46,7 +46,7 @@ const StellarPayment = ({
     setPaymentStatus('processing');
     
     const paymentRequest: PaymentRequest = {
-      amount: price, // This will now be a number as expected
+      amount: price, // Using the price number directly
       currency,
       eventId,
       eventName,
