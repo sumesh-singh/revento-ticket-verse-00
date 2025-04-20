@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TicketDisplay from '../components/TicketDisplay';
-import EventRegistration from '../components/EventRegistration';
+import EventRegistration from '../components/registration/EventRegistration';
 import TicketPurchase from '../components/TicketPurchase';
 import EventDetailsSection from '../components/event/EventDetailsSection';
 import EventActions from '../components/event/EventActions';
