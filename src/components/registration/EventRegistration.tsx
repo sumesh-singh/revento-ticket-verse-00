@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,8 @@ import { Event, RegistrationFormData } from '@/types';
 import PersonalInfoStep from './PersonalInfoStep';
 import TeamInfoStep from './TeamInfoStep';
 import ConfirmationStep from './ConfirmationStep';
+import { useAuth } from '@/context/AuthContext';
+import { registerForEvent } from '@/services/FirestoreService';
 
 interface EventRegistrationProps {
   event: Event;
@@ -18,14 +21,15 @@ interface EventRegistrationProps {
 
 const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProps) => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const totalSteps = 3;
   const progress = (currentStep / totalSteps) * 100;
   
   const [formData, setFormData] = useState<RegistrationFormData>({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     phone: '',
     ticketType: '',
     dietaryRestrictions: '',
@@ -108,7 +112,26 @@ const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProp
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to register for this event",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+    
+    if (!user) {
+      toast({
+        title: "User profile not found",
+        description: "Please log in again",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!formData.agreedToTerms) {
       toast({
         title: "Terms Agreement Required",
@@ -127,19 +150,55 @@ const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProp
       });
       return;
     }
-
-    navigate('/payment', {
-      state: {
-        paymentDetails: {
-          eventId: event.id,
-          eventName: event.title,
-          ticketType: selectedTier.name,
-          price: selectedTier.price,
-          currency: selectedTier.currency,
-          userEmail: formData.email,
-        }
+    
+    setIsProcessing(true);
+    
+    try {
+      // Register for the event in the database
+      const result = await registerForEvent({
+        userId: user.id,
+        eventId: event.id,
+        ticketType: selectedTier.id,
+        amount: selectedTier.price,
+        currency: selectedTier.currency,
+        paymentMethod: 'stellar', // Default to Stellar
+        personal: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          dietaryRestrictions: formData.dietaryRestrictions
+        },
+        teamMembers: formData.teamMembers.filter(member => !!member)
+      });
+      
+      if (result.success) {
+        // Navigate to payment page with registration and transaction IDs
+        navigate('/payment', {
+          state: {
+            paymentDetails: {
+              eventId: event.id,
+              eventName: event.title,
+              ticketType: selectedTier.name,
+              price: selectedTier.price,
+              currency: selectedTier.currency,
+              userEmail: formData.email,
+              registrationId: result.registrationId,
+              transactionId: result.transactionId
+            }
+          }
+        });
+      } else {
+        throw new Error(result.error || "Failed to register for the event");
       }
-    });
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const renderStepContent = () => {

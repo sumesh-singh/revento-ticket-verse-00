@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Building, User as UserIcon, AlertTriangle } from 'lucide-react';
@@ -70,17 +69,12 @@ const Auth = () => {
         
         navigate('/dashboard');
       } else if (mode === 'signup') {
-        if (data.email === 'existing@example.com') {
-          toast({
-            title: "Email already exists",
-            description: "Please use a different email or login with this one.",
-            variant: "destructive",
-          });
-          setIsFormSubmitting(false);
-          return;
-        }
-        
-        await registerUser(data.email, data.password);
+        await registerUser(data.email, data.password, {
+          username: data.username,
+          name: data.fullName,
+          role: role,
+          orgName: role === 'organizer' ? data.orgName : undefined
+        });
         
         toast({
           title: "Account created!",
@@ -114,233 +108,6 @@ const Auth = () => {
     });
     
     setRecoverOpen(false);
-  };
-
-  const renderForm = () => {
-    switch (mode) {
-      case 'login':
-        return (
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
-            <div className="space-y-4">
-              <FormInput
-                id="username"
-                label="Username or Email"
-                placeholder="johndoe@example.com"
-                error={errors.email?.message as string}
-                {...register("email", { 
-                  required: "Username/Email is required",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address"
-                  }
-                })}
-                icon={<Mail className="h-5 w-5 text-gray-400" />}
-              />
-              
-              <FormInput
-                id="password"
-                label="Password"
-                type={passwordVisible ? "text" : "password"}
-                placeholder="••••••••"
-                error={errors.password?.message as string}
-                {...register("password", { 
-                  required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters"
-                  }
-                })}
-                icon={passwordVisible ? 
-                  <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                  <Eye className="h-5 w-5 text-gray-400" />
-                }
-                onIconClick={togglePasswordVisibility}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
-                <Label htmlFor="remember" className="text-sm">Remember me</Label>
-              </div>
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm"
-                onClick={() => setRecoverOpen(true)}
-              >
-                Forgot password?
-              </Button>
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              disabled={isFormSubmitting}
-            >
-              {isFormSubmitting ? "Logging in..." : "Login"}
-            </Button>
-            
-            <div className="text-center text-sm animate-fade-in">
-              Don't have an account?{" "}
-              <Button
-                type="button"
-                variant="link"
-                className="p-0 hover:text-primary transition-colors"
-                onClick={() => setMode('signup')}
-              >
-                Sign up
-              </Button>
-            </div>
-          </form>
-        );
-        
-      case 'signup':
-        return (
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
-            <div className="space-y-4">
-              <FormInput
-                id="fullName"
-                label="Full Name"
-                placeholder="John Doe"
-                error={errors.fullName?.message as string}
-                {...register("fullName", { required: "Full name is required" })}
-                icon={<UserIcon className="h-5 w-5 text-gray-400" />}
-              />
-              
-              <FormInput
-                id="username"
-                label="Username"
-                placeholder="johndoe"
-                error={errors.username?.message as string}
-                {...register("username", { 
-                  required: "Username is required",
-                  pattern: {
-                    value: /^[a-zA-Z0-9_-]+$/,
-                    message: "Username can only contain letters, numbers, underscores and dashes"
-                  }
-                })}
-                icon={<UserIcon className="h-5 w-5 text-gray-400" />}
-              />
-              
-              {role === 'organizer' && (
-                <div className="space-y-2 business-fields">
-                  <Label htmlFor="orgName">Organization Name</Label>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="orgName"
-                      placeholder="Company or Institution Name"
-                      className="pl-10"
-                      {...register("orgName", { 
-                        required: role === 'organizer' ? "Organization name is required" : false 
-                      })}
-                    />
-                  </div>
-                  {errors.orgName && (
-                    <p className="text-sm text-red-500 flex items-center mt-1">
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      {errors.orgName.message as string}
-                    </p>
-                  )}
-                </div>
-              )}
-              
-              <FormInput
-                id="email"
-                label="Email"
-                type="email"
-                placeholder="your@email.com"
-                error={errors.email?.message as string}
-                {...register("email", { 
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address"
-                  }
-                })}
-                icon={<Mail className="h-5 w-5 text-gray-400" />}
-              />
-              
-              <div className="space-y-2">
-                <FormInput
-                  id="password"
-                  label="Password"
-                  type={passwordVisible ? "text" : "password"}
-                  placeholder="••••••••"
-                  error={errors.password?.message as string}
-                  {...register("password", { 
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters"
-                    }
-                  })}
-                  icon={passwordVisible ? 
-                    <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  }
-                  onIconClick={togglePasswordVisibility}
-                />
-                <PasswordStrengthMeter password={watchPassword} />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    className="pl-10"
-                    {...register("confirmPassword", { 
-                      required: "Please confirm your password",
-                      validate: value => value === watchPassword || "Passwords do not match"
-                    })}
-                  />
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-500 flex items-center mt-1">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    {errors.confirmPassword.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox id="terms" />
-              <Label htmlFor="terms" className="text-sm">
-                I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
-              </Label>
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              disabled={isFormSubmitting}
-            >
-              {isFormSubmitting ? "Creating Account..." : "Create Account"}
-            </Button>
-            
-            <div className="text-center text-sm animate-fade-in">
-              Already have an account?{" "}
-              <Button
-                type="button"
-                variant="link"
-                className="p-0 hover:text-primary transition-colors"
-                onClick={() => setMode('login')}
-              >
-                Log in
-              </Button>
-            </div>
-          </form>
-        );
-        
-      default:
-        return null;
-    }
   };
 
   return (
@@ -400,7 +167,211 @@ const Auth = () => {
             )}
             
             <div className="mt-6">
-              {renderForm()}
+              {mode === 'login' ? (
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
+                  <div className="space-y-4">
+                    <FormInput
+                      id="email"
+                      label="Email"
+                      placeholder="johndoe@example.com"
+                      error={errors.email?.message as string}
+                      {...register("email", { 
+                        required: "Email is required",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Invalid email address"
+                        }
+                      })}
+                      icon={<Mail className="h-5 w-5 text-gray-400" />}
+                    />
+                    
+                    <FormInput
+                      id="password"
+                      label="Password"
+                      type={passwordVisible ? "text" : "password"}
+                      placeholder="••••••••"
+                      error={errors.password?.message as string}
+                      {...register("password", { 
+                        required: "Password is required",
+                        minLength: {
+                          value: 8,
+                          message: "Password must be at least 8 characters"
+                        }
+                      })}
+                      icon={passwordVisible ? 
+                        <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                        <Eye className="h-5 w-5 text-gray-400" />
+                      }
+                      onIconClick={togglePasswordVisibility}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="remember" />
+                      <Label htmlFor="remember" className="text-sm">Remember me</Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm"
+                      onClick={() => setRecoverOpen(true)}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={isFormSubmitting}
+                  >
+                    {isFormSubmitting ? "Logging in..." : "Login"}
+                  </Button>
+                  
+                  <div className="text-center text-sm animate-fade-in">
+                    Don't have an account?{" "}
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 hover:text-primary transition-colors"
+                      onClick={() => setMode('signup')}
+                    >
+                      Sign up
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
+                  <div className="space-y-4">
+                    <FormInput
+                      id="fullName"
+                      label="Full Name"
+                      placeholder="John Doe"
+                      error={errors.fullName?.message as string}
+                      {...register("fullName", { required: "Full name is required" })}
+                      icon={<UserIcon className="h-5 w-5 text-gray-400" />}
+                    />
+                    
+                    <FormInput
+                      id="username"
+                      label="Username"
+                      placeholder="johndoe"
+                      error={errors.username?.message as string}
+                      {...register("username", { 
+                        required: "Username is required",
+                        pattern: {
+                          value: /^[a-zA-Z0-9_-]+$/,
+                          message: "Username can only contain letters, numbers, underscores and dashes"
+                        }
+                      })}
+                      icon={<UserIcon className="h-5 w-5 text-gray-400" />}
+                    />
+                    
+                    {role === 'organizer' && (
+                      <FormInput
+                        id="orgName"
+                        label="Organization Name"
+                        placeholder="Company or Institution Name"
+                        error={errors.orgName?.message as string}
+                        {...register("orgName", { 
+                          required: role === 'organizer' ? "Organization name is required" : false 
+                        })}
+                        icon={<Building className="h-5 w-5 text-gray-400" />}
+                      />
+                    )}
+                    
+                    <FormInput
+                      id="email"
+                      label="Email"
+                      type="email"
+                      placeholder="your@email.com"
+                      error={errors.email?.message as string}
+                      {...register("email", { 
+                        required: "Email is required",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Invalid email address"
+                        }
+                      })}
+                      icon={<Mail className="h-5 w-5 text-gray-400" />}
+                    />
+                    
+                    <div className="space-y-2">
+                      <FormInput
+                        id="password"
+                        label="Password"
+                        type={passwordVisible ? "text" : "password"}
+                        placeholder="••••••••"
+                        error={errors.password?.message as string}
+                        {...register("password", { 
+                          required: "Password is required",
+                          minLength: {
+                            value: 8,
+                            message: "Password must be at least 8 characters"
+                          }
+                        })}
+                        icon={passwordVisible ? 
+                          <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                          <Eye className="h-5 w-5 text-gray-400" />
+                        }
+                        onIconClick={togglePasswordVisibility}
+                      />
+                      <PasswordStrengthMeter password={watchPassword} />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="••••••••"
+                          className="pl-10"
+                          {...register("confirmPassword", { 
+                            required: "Please confirm your password",
+                            validate: value => value === watchPassword || "Passwords do not match"
+                          })}
+                        />
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="text-sm text-red-500 flex items-center mt-1">
+                          <AlertTriangle className="h-4 w-4 mr-1" />
+                          {errors.confirmPassword.message as string}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="terms" />
+                    <Label htmlFor="terms" className="text-sm">
+                      I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+                    </Label>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={isFormSubmitting}
+                  >
+                    {isFormSubmitting ? "Creating Account..." : "Create Account"}
+                  </Button>
+                  
+                  <div className="text-center text-sm animate-fade-in">
+                    Already have an account?{" "}
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 hover:text-primary transition-colors"
+                      onClick={() => setMode('login')}
+                    >
+                      Log in
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
             
             {(mode === 'login' || mode === 'signup') && (
