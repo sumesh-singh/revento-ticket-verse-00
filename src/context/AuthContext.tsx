@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 
 export type User = {
   id: string;
+  username: string;
   name: string;
   email: string;
   role: 'user' | 'organizer';
@@ -40,7 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         const user: User = {
           id: firebaseUser.uid,
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || '',
+          name: firebaseUser.displayName || 'User',
           email: firebaseUser.email || '',
           role: 'user',
           avatarUrl: firebaseUser.photoURL || undefined,

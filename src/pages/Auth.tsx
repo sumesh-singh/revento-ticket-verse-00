@@ -1,28 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  Mail, 
-  Building, 
-  User as UserIcon, 
-  CreditCard, 
-  FileText,
-  AlertTriangle,
-  Check
-} from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Building, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import { useForm } from 'react-hook-form';
 import AuthIllustration from '@/components/AuthIllustration';
 import { useAuth } from '@/context/AuthContext';
+import FormInput from '@/components/auth/FormInput';
 
 type UserRole = 'user' | 'organizer';
 type AuthMode = 'login' | 'signup' | 'forgot-password';
@@ -41,14 +29,12 @@ const Auth = () => {
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
   const watchPassword = watch("password", "");
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
 
-  // Effect to initialize from query params if any
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const roleParam = params.get('role');
@@ -81,7 +67,6 @@ const Auth = () => {
         
         navigate('/dashboard');
       } else if (mode === 'signup') {
-        // For demo: check if email exists
         if (data.email === 'existing@example.com') {
           toast({
             title: "Email already exists",
@@ -128,77 +113,46 @@ const Auth = () => {
     setRecoverOpen(false);
   };
 
-  // Render specific forms based on mode
   const renderForm = () => {
     switch (mode) {
       case 'login':
         return (
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full">
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="email"
-                    placeholder="your@email.com"
-                    className="pl-10"
-                    {...register("email", { 
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: "Invalid email address"
-                      }
-                    })}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-sm text-red-500 flex items-center mt-1">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    {errors.email.message as string}
-                  </p>
-                )}
-              </div>
+              <FormInput
+                id="username"
+                label="Username or Email"
+                placeholder="johndoe@example.com"
+                error={errors.email?.message as string}
+                {...register("email", { 
+                  required: "Username/Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                icon={<Mail className="h-5 w-5 text-gray-400" />}
+              />
               
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={passwordVisible ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10"
-                    {...register("password", { 
-                      required: "Password is required",
-                      minLength: {
-                        value: 8,
-                        message: "Password must be at least 8 characters"
-                      }
-                    })}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1 h-8 w-8 p-0"
-                    onClick={togglePasswordVisibility}
-                  >
-                    {passwordVisible ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
-                    )}
-                    <span className="sr-only">Toggle password visibility</span>
-                  </Button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-500 flex items-center mt-1">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    {errors.password.message as string}
-                  </p>
-                )}
-              </div>
+              <FormInput
+                id="password"
+                label="Password"
+                type={passwordVisible ? "text" : "password"}
+                placeholder="••••••••"
+                error={errors.password?.message as string}
+                {...register("password", { 
+                  required: "Password is required",
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters"
+                  }
+                })}
+                icon={passwordVisible ? 
+                  <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                  <Eye className="h-5 w-5 text-gray-400" />
+                }
+                onIconClick={togglePasswordVisibility}
+              />
             </div>
             
             <div className="flex items-center justify-between">
@@ -216,16 +170,20 @@ const Auth = () => {
               </Button>
             </div>
             
-            <Button type="submit" className="w-full" disabled={isFormSubmitting}>
+            <Button 
+              type="submit" 
+              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isFormSubmitting}
+            >
               {isFormSubmitting ? "Logging in..." : "Login"}
             </Button>
             
-            <div className="text-center text-sm">
+            <div className="text-center text-sm animate-fade-in">
               Don't have an account?{" "}
               <Button
                 type="button"
                 variant="link"
-                className="p-0"
+                className="p-0 hover:text-primary transition-colors"
                 onClick={() => setMode('signup')}
               >
                 Sign up
@@ -236,8 +194,32 @@ const Auth = () => {
         
       case 'signup':
         return (
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full">
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
             <div className="space-y-4">
+              <FormInput
+                id="fullName"
+                label="Full Name"
+                placeholder="John Doe"
+                error={errors.fullName?.message as string}
+                {...register("fullName", { required: "Full name is required" })}
+                icon={<UserIcon className="h-5 w-5 text-gray-400" />}
+              />
+              
+              <FormInput
+                id="username"
+                label="Username"
+                placeholder="johndoe"
+                error={errors.username?.message as string}
+                {...register("username", { 
+                  required: "Username is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message: "Username can only contain letters, numbers, underscores and dashes"
+                  }
+                })}
+                icon={<UserIcon className="h-5 w-5 text-gray-400" />}
+              />
+              
               {role === 'organizer' && (
                 <div className="space-y-2 business-fields">
                   <Label htmlFor="orgName">Organization Name</Label>
@@ -261,140 +243,43 @@ const Auth = () => {
                 </div>
               )}
               
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <div className="relative">
-                  <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="fullName"
-                    placeholder="Your full name"
-                    className="pl-10"
-                    {...register("fullName", { required: "Full name is required" })}
-                  />
-                </div>
-                {errors.fullName && (
-                  <p className="text-sm text-red-500 flex items-center mt-1">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    {errors.fullName.message as string}
-                  </p>
-                )}
-              </div>
+              <FormInput
+                id="email"
+                label="Email"
+                type="email"
+                placeholder="your@email.com"
+                error={errors.email?.message as string}
+                {...register("email", { 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                icon={<Mail className="h-5 w-5 text-gray-400" />}
+              />
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="email"
-                    placeholder="your@email.com"
-                    className="pl-10"
-                    {...register("email", { 
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: "Invalid email address"
-                      }
-                    })}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-sm text-red-500 flex items-center mt-1">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    {errors.email.message as string}
-                  </p>
-                )}
-              </div>
-              
-              {role === 'organizer' && (
-                <div className="space-y-2 business-fields">
-                  <Label htmlFor="taxId">Tax ID / Registration Number</Label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="taxId"
-                      placeholder="e.g., EIN: 12-3456789"
-                      className="pl-10"
-                      {...register("taxId", { 
-                        required: role === 'organizer' ? "Tax ID is required" : false 
-                      })}
-                    />
-                  </div>
-                  {errors.taxId && (
-                    <p className="text-sm text-red-500 flex items-center mt-1">
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      {errors.taxId.message as string}
-                    </p>
-                  )}
-                  
-                  <div className="mt-4">
-                    <Label htmlFor="document">Verification Document (PDF)</Label>
-                    <div className="mt-2 flex items-center">
-                      <label
-                        htmlFor="document-upload"
-                        className="cursor-pointer relative bg-white border border-gray-300 rounded-md py-2 px-3 flex items-center justify-center hover:bg-gray-50 w-full"
-                      >
-                        <FileText className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-600">Upload Document</span>
-                        <input
-                          id="document-upload"
-                          type="file"
-                          className="sr-only"
-                          accept=".pdf,.png,.jpg"
-                          {...register("document", { 
-                            required: role === 'organizer' ? "Document is required" : false 
-                          })}
-                        />
-                      </label>
-                    </div>
-                    {errors.document && (
-                      <p className="text-sm text-red-500 flex items-center mt-1">
-                        <AlertTriangle className="h-4 w-4 mr-1" />
-                        {errors.document.message as string}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={passwordVisible ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10"
-                    {...register("password", { 
-                      required: "Password is required",
-                      minLength: {
-                        value: 8,
-                        message: "Password must be at least 8 characters"
-                      }
-                    })}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1 h-8 w-8 p-0"
-                    onClick={togglePasswordVisibility}
-                  >
-                    {passwordVisible ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
-                    )}
-                    <span className="sr-only">Toggle password visibility</span>
-                  </Button>
-                </div>
+                <FormInput
+                  id="password"
+                  label="Password"
+                  type={passwordVisible ? "text" : "password"}
+                  placeholder="••••••••"
+                  error={errors.password?.message as string}
+                  {...register("password", { 
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters"
+                    }
+                  })}
+                  icon={passwordVisible ? 
+                    <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  }
+                  onIconClick={togglePasswordVisibility}
+                />
                 <PasswordStrengthMeter password={watchPassword} />
-                {errors.password && (
-                  <p className="text-sm text-red-500 flex items-center mt-1">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    {errors.password.message as string}
-                  </p>
-                )}
               </div>
               
               <div className="space-y-2">
@@ -428,16 +313,20 @@ const Auth = () => {
               </Label>
             </div>
             
-            <Button type="submit" className="w-full" disabled={isFormSubmitting}>
+            <Button 
+              type="submit" 
+              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isFormSubmitting}
+            >
               {isFormSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
             
-            <div className="text-center text-sm">
+            <div className="text-center text-sm animate-fade-in">
               Already have an account?{" "}
               <Button
                 type="button"
                 variant="link"
-                className="p-0"
+                className="p-0 hover:text-primary transition-colors"
                 onClick={() => setMode('login')}
               >
                 Log in
@@ -460,7 +349,7 @@ const Auth = () => {
         
         <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 md:p-12">
           <div className="w-full max-w-md space-y-8">
-            <div className="text-center">
+            <div className="text-center animate-fade-in">
               <h1 className="text-3xl md:text-4xl font-display font-bold mb-2 bg-clip-text text-transparent bg-gradient-primary">
                 {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Join Revento' : 'Verify Your Account'}
               </h1>
@@ -560,7 +449,6 @@ const Auth = () => {
         </div>
       </div>
       
-      {/* Password Recovery Sheet */}
       <Sheet open={recoverOpen} onOpenChange={setRecoverOpen}>
         <SheetContent className="sm:max-w-md">
           <SheetHeader>
