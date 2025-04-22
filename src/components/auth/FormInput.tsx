@@ -14,9 +14,14 @@ interface FormInputProps {
   className?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onIconClick?: () => void;
+  name?: string;
+  value?: string;
+  required?: boolean;
+  onBlur?: any;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-const FormInput = ({
+const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(({
   id,
   label,
   type = "text",
@@ -25,8 +30,9 @@ const FormInput = ({
   icon,
   className,
   onChange,
-  onIconClick
-}: FormInputProps) => {
+  onIconClick,
+  ...props
+}, ref) => {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -37,6 +43,8 @@ const FormInput = ({
           placeholder={placeholder}
           className={`pl-10 pr-10 transition-all duration-200 focus:scale-[1.02] ${className}`}
           onChange={onChange}
+          ref={ref}
+          {...props}
         />
         {icon && (
           <button
@@ -56,6 +64,8 @@ const FormInput = ({
       )}
     </div>
   );
-};
+});
+
+FormInput.displayName = "FormInput";
 
 export default FormInput;
