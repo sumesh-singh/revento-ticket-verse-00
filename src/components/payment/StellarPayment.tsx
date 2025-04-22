@@ -168,8 +168,7 @@ const StellarPayment = ({
                     <div>
                       <label className="text-xs font-medium">Memo (Optional)</label>
                       <Input 
-                        size="sm"
-                        className="mt-1 text-xs"
+                        className="mt-1 text-xs h-8"
                         placeholder="Add a memo to your transaction"
                       />
                     </div>

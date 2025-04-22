@@ -18,6 +18,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Settings from "./pages/Settings";
 import PaymentPage from "./pages/PaymentPage";
+import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ function App() {
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Chatbot />
           </Router>
         </TooltipProvider>
       </AuthProvider>
