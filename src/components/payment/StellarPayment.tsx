@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ interface StellarPaymentProps {
   eventId: string;
   eventName: string;
   ticketType: string;
-  price: number;  // Ensure this is a number
+  price: number;
   currency: string;
   userEmail: string;
   onPaymentComplete: (transactionId: string) => void;
@@ -21,7 +22,7 @@ const StellarPayment = ({
   eventId,
   eventName,
   ticketType,
-  price,  // This is now explicitly a number
+  price,
   currency,
   userEmail,
   onPaymentComplete,
@@ -45,7 +46,7 @@ const StellarPayment = ({
     setPaymentStatus('processing');
     
     const paymentRequest: PaymentRequest = {
-      amount: price, // Using the price number directly
+      amount: price,
       currency,
       eventId,
       eventName,

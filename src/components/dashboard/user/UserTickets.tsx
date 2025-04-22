@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { QrCode as QrCodeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,13 +8,14 @@ import TicketSkeleton from './TicketSkeleton';
 import { Ticket, TicketStatus, PaymentMethod } from '@/types';
 import { useLocation } from 'react-router-dom';
 
+console.log("Checking for type issues in UserTickets.tsx");
+
 const UserTickets = () => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   
-  // Get transaction ID from URL if available
   const query = new URLSearchParams(location.search);
   const transactionId = query.get('transaction');
 
@@ -23,19 +23,16 @@ const UserTickets = () => {
     const loadTickets = async () => {
       setIsLoading(true);
       try {
-        // First check localStorage for any stored tickets
         const storedTickets = JSON.parse(localStorage.getItem('userTickets') || '[]');
 
-        // If we have stored tickets, use those
         if (storedTickets.length > 0) {
           setTickets(storedTickets);
         } else {
-          // Fall back to dummy tickets for demo
           await new Promise(resolve => setTimeout(resolve, 800));
           
           const dummyTickets: Ticket[] = [
             {
-              id: 1,
+              id: "1",
               eventName: "Tech Conference 2025",
               date: "April 15, 2025",
               time: "9:00 AM - 5:00 PM",
@@ -52,7 +49,7 @@ const UserTickets = () => {
               purchaseDate: "2025-03-15T14:32:21Z"
             },
             {
-              id: 2,
+              id: "2",
               eventName: "Music Festival",
               date: "May 20, 2025",
               time: "4:00 PM - 11:00 PM",
@@ -69,7 +66,7 @@ const UserTickets = () => {
               purchaseDate: "2025-04-01T09:15:43Z"
             },
             {
-              id: 3,
+              id: "3",
               eventName: "Startup Meetup",
               date: "March 10, 2025",
               time: "7:00 PM - 9:00 PM",
@@ -103,7 +100,6 @@ const UserTickets = () => {
     
     loadTickets();
     
-    // If transaction ID exists in URL, show success toast
     if (transactionId) {
       toast({
         title: "Purchase Complete!",

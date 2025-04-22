@@ -1,4 +1,3 @@
-
 export type PaymentMethod = 'crypto' | 'stellar' | 'fiat';
 export type TicketStatus = 'upcoming' | 'attended' | 'cancelled';
 export type RegistrationStatus = 'pending' | 'confirmed' | 'cancelled';
@@ -143,6 +142,11 @@ export interface PaymentDetails {
   registrationId?: string;
   transactionId?: string;
   registrationData?: RegistrationFormData;
+  userId?: string;
+  eventDate?: string;
+  eventTime?: string;
+  eventLocation?: string;
+  eventImage?: string;
 }
 
 export interface UserProfile {

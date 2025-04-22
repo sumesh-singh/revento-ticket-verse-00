@@ -2,6 +2,46 @@
 import { createTicket, updateTransactionStatus } from './FirestoreService';
 import { PaymentDetails } from '@/types';
 
+// Define the PaymentRequest interface
+export interface PaymentRequest {
+  amount: number;
+  currency: string;
+  eventId: string;
+  eventName: string;
+  ticketType: string;
+  userEmail: string;
+}
+
+// Create a class for handling Stellar payments
+export class StellarPaymentService {
+  // Initialize a payment and return a transaction ID
+  async initializePayment(paymentRequest: PaymentRequest): Promise<{success: boolean, transactionId?: string, error?: string}> {
+    try {
+      // In a real implementation, this would create a transaction in the blockchain
+      // For demo purposes, we'll just generate a random transaction ID
+      const transactionId = `stx_${Math.random().toString(36).substring(2, 15)}`;
+      
+      return {
+        success: true,
+        transactionId
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Failed to initialize payment'
+      };
+    }
+  }
+  
+  // Process payment and create a ticket
+  async processPayment(transactionId: string, paymentDetails: PaymentDetails): Promise<{success: boolean, ticket?: any, error?: string}> {
+    return processStellarPayment(paymentDetails);
+  }
+}
+
+// Create an instance of the service to export
+export const stellarPaymentService = new StellarPaymentService();
+
 export const processStellarPayment = async (paymentDetails: PaymentDetails): Promise<{success: boolean, ticket?: any, error?: string}> => {
   // Simulate a payment process
   return new Promise((resolve) => {
