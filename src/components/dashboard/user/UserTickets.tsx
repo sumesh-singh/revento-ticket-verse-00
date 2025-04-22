@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { QrCode as QrCodeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,9 @@ const UserTickets = () => {
           const dummyTickets: Ticket[] = [
             {
               id: "1",
+              userId: user?.id || "anonymous-user",
+              eventId: "event-001",
+              registrationId: "reg-001",
               eventName: "Tech Conference 2025",
               date: "April 15, 2025",
               time: "9:00 AM - 5:00 PM",
@@ -50,6 +54,9 @@ const UserTickets = () => {
             },
             {
               id: "2",
+              userId: user?.id || "anonymous-user",
+              eventId: "event-002",
+              registrationId: "reg-002",
               eventName: "Music Festival",
               date: "May 20, 2025",
               time: "4:00 PM - 11:00 PM",
@@ -67,6 +74,9 @@ const UserTickets = () => {
             },
             {
               id: "3",
+              userId: user?.id || "anonymous-user",
+              eventId: "event-003",
+              registrationId: "reg-003",
               eventName: "Startup Meetup",
               date: "March 10, 2025",
               time: "7:00 PM - 9:00 PM",
@@ -106,7 +116,7 @@ const UserTickets = () => {
         description: "Your ticket has been successfully added to your account.",
       });
     }
-  }, [transactionId]);
+  }, [transactionId, user?.id]);
 
   return (
     <div className="space-y-6">
