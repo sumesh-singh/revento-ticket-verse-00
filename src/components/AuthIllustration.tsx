@@ -68,16 +68,12 @@ const AuthIllustration: React.FC<AuthIllustrationProps> = ({ role }) => {
           </ul>
         </div>
         
-        <img
-          src={role === 'user' ? "public/lovable-uploads/57e0eac2-019e-4bb4-8bc8-94eb92282994.png" : "https://illustrations.popsy.co/white/team-work.svg"}
-          alt={role === 'user' ? "Event attendees" : "Event organizers"}
-          className="max-w-xs mx-auto"
-        />
+        {/* Removed image */}
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 rounded-full bg-purple-500/30 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 rounded-full bg-blue-500/30 blur-3xl"></div>
       </div>
-      
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 rounded-full bg-purple-500/30 blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 rounded-full bg-blue-500/30 blur-3xl"></div>
     </div>
   );
 };
