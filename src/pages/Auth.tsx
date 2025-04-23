@@ -10,7 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import AuthIllustration from '@/components/AuthIllustration';
 import { useAuth } from '@/context/AuthContext';
 import FormInput from '@/components/auth/FormInput';
@@ -333,20 +333,20 @@ const Auth = () => {
                       control={signupForm.control}
                       name="fullName"
                       rules={{ required: "Full name is required" }}
-                      render={({ field, fieldState }) => (
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel>Full Name</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
-                                {...field} 
+                                {...field}
                                 placeholder="John Doe" 
                                 className="pl-10" 
                               />
                             </div>
                           </FormControl>
-                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -361,20 +361,20 @@ const Auth = () => {
                           message: "Username can only contain letters, numbers, underscores and dashes"
                         }
                       }}
-                      render={({ field, fieldState }) => (
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
-                                {...field} 
+                                {...field}
                                 placeholder="johndoe" 
                                 className="pl-10" 
                               />
                             </div>
                           </FormControl>
-                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -386,20 +386,20 @@ const Auth = () => {
                         rules={{ 
                           required: role === 'organizer' ? "Organization name is required" : false 
                         }}
-                        render={({ field, fieldState }) => (
+                        render={({ field }) => (
                           <FormItem>
                             <FormLabel>Organization Name</FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                 <Input 
-                                  {...field} 
+                                  {...field}
                                   placeholder="Company or Institution Name" 
                                   className="pl-10" 
                                 />
                               </div>
                             </FormControl>
-                            {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -415,20 +415,20 @@ const Auth = () => {
                           message: "Invalid email address"
                         }
                       }}
-                      render={({ field, fieldState }) => (
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
-                                {...field} 
+                                {...field}
                                 placeholder="your@email.com" 
                                 className="pl-10" 
                               />
                             </div>
                           </FormControl>
-                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -443,14 +443,14 @@ const Auth = () => {
                           message: "Password must be at least 8 characters"
                         }
                       }}
-                      render={({ field, fieldState }) => (
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
-                                {...field} 
+                                {...field}
                                 type={passwordVisible ? "text" : "password"}
                                 placeholder="••••••••" 
                                 className="pl-10" 
@@ -467,7 +467,7 @@ const Auth = () => {
                               </button>
                             </div>
                           </FormControl>
-                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          <FormMessage />
                           <PasswordStrengthMeter password={watchPassword} />
                         </FormItem>
                       )}
@@ -480,14 +480,14 @@ const Auth = () => {
                         required: "Please confirm your password",
                         validate: value => value === watchPassword || "Passwords do not match"
                       }}
-                      render={({ field, fieldState }) => (
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
-                                {...field} 
+                                {...field}
                                 type={confirmPasswordVisible ? "text" : "password"}
                                 placeholder="••••••••" 
                                 className="pl-10" 
@@ -504,15 +504,22 @@ const Auth = () => {
                               </button>
                             </div>
                           </FormControl>
-                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
                     
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="termsAccepted"
-                        {...signupForm.register("termsAccepted")}
+                      <Controller
+                        control={signupForm.control}
+                        name="termsAccepted"
+                        render={({ field }) => (
+                          <Checkbox 
+                            id="termsAccepted"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        )}
                       />
                       <Label htmlFor="termsAccepted" className="text-sm">
                         I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
