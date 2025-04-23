@@ -9,7 +9,342 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          attendees: number | null
+          category: string
+          coordinates: Json | null
+          created_at: string | null
+          date: string
+          description: string
+          id: string
+          image: string | null
+          location: string
+          organizer: string
+          organizer_id: string
+          place_id: string | null
+          price: number | null
+          time: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          attendees?: number | null
+          category: string
+          coordinates?: Json | null
+          created_at?: string | null
+          date: string
+          description: string
+          id?: string
+          image?: string | null
+          location: string
+          organizer: string
+          organizer_id: string
+          place_id?: string | null
+          price?: number | null
+          time: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          attendees?: number | null
+          category?: string
+          coordinates?: Json | null
+          created_at?: string | null
+          date?: string
+          description?: string
+          id?: string
+          image?: string | null
+          location?: string
+          organizer?: string
+          organizer_id?: string
+          place_id?: string | null
+          price?: number | null
+          time?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          org_name: string | null
+          reward_points: number | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          id: string
+          name: string
+          org_name?: string | null
+          reward_points?: number | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          org_name?: string | null
+          reward_points?: number | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string
+          personal: Json
+          status: string
+          team_members: string[] | null
+          ticket_type: string | null
+          transaction_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          personal: Json
+          status: string
+          team_members?: string[] | null
+          ticket_type?: string | null
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          personal?: Json
+          status?: string
+          team_members?: string[] | null
+          ticket_type?: string | null
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_ticket_type_fkey"
+            columns: ["ticket_type"]
+            isOneToOne: false
+            referencedRelation: "ticket_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_tiers: {
+        Row: {
+          available: boolean | null
+          benefits: string[] | null
+          created_at: string | null
+          currency: string
+          description: string | null
+          event_id: string | null
+          id: string
+          max_per_transaction: number | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          benefits?: string[] | null
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          max_per_transaction?: number | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          benefits?: string[] | null
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          max_per_transaction?: number | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_tiers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          blockchain: string | null
+          created_at: string | null
+          date: string
+          event_id: string | null
+          event_name: string
+          id: string
+          image: string | null
+          ipfs_cid: string | null
+          location: string
+          payment_method: string
+          purchase_date: string
+          registration_id: string | null
+          status: string
+          ticket_number: string
+          ticket_type: string
+          time: string
+          token_id: string | null
+          tx_hash: string | null
+          user_id: string | null
+        }
+        Insert: {
+          blockchain?: string | null
+          created_at?: string | null
+          date: string
+          event_id?: string | null
+          event_name: string
+          id?: string
+          image?: string | null
+          ipfs_cid?: string | null
+          location: string
+          payment_method: string
+          purchase_date: string
+          registration_id?: string | null
+          status: string
+          ticket_number: string
+          ticket_type: string
+          time: string
+          token_id?: string | null
+          tx_hash?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          blockchain?: string | null
+          created_at?: string | null
+          date?: string
+          event_id?: string | null
+          event_name?: string
+          id?: string
+          image?: string | null
+          ipfs_cid?: string | null
+          location?: string
+          payment_method?: string
+          purchase_date?: string
+          registration_id?: string | null
+          status?: string
+          ticket_number?: string
+          ticket_type?: string
+          time?: string
+          token_id?: string | null
+          tx_hash?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string
+          event_id: string | null
+          id: string
+          payment_details: Json | null
+          payment_method: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string
+          event_id?: string | null
+          id?: string
+          payment_details?: Json | null
+          payment_method: string
+          status: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          event_id?: string | null
+          id?: string
+          payment_details?: Json | null
+          payment_method?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +353,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "organizer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +468,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["user", "organizer"],
+    },
   },
 } as const
