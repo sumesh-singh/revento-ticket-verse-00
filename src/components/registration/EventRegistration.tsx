@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import PersonalInfoStep from './PersonalInfoStep';
 import TeamInfoStep from './TeamInfoStep';
 import ConfirmationStep from './ConfirmationStep';
 import { useAuth } from '@/context/AuthContext';
-import { registerForEvent } from '@/services/FirestoreService';
+import { registerForEvent } from '@/services/SupabaseService';
 
 interface EventRegistrationProps {
   event: Event;
@@ -154,7 +153,6 @@ const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProp
     setIsProcessing(true);
     
     try {
-      // Register for the event in the database
       const result = await registerForEvent({
         userId: user.id,
         eventId: event.id,
@@ -172,7 +170,6 @@ const EventRegistration = ({ event, onCancel, onSuccess }: EventRegistrationProp
       });
       
       if (result.success) {
-        // Navigate to payment page with registration and transaction IDs
         navigate('/payment', {
           state: {
             paymentDetails: {
