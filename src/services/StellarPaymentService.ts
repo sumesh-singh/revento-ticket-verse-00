@@ -1,5 +1,5 @@
 
-import { createTicket, updateTransactionStatus } from './FirestoreService';
+import { createTicket, updateTransactionStatus } from './SupabaseService';
 import { PaymentDetails } from '@/types';
 
 // Define the PaymentRequest interface
