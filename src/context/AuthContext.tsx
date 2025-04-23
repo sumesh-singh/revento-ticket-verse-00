@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export type User = {
@@ -27,18 +28,102 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Placeholder functions until Supabase is integrated
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          setIsAuthenticated(true);
+          // Don't call additional Supabase functions directly in the callback
+          // Use setTimeout to avoid potential deadlocks
+          setTimeout(async () => {
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (profile) {
+                setUser({
+                  id: profile.id,
+                  username: profile.username,
+                  name: profile.name,
+                  email: profile.email,
+                  role: profile.role,
+                  rewardPoints: profile.reward_points,
+                  avatarUrl: profile.avatar_url
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching user profile:', error);
+            }
+          }, 0);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          setIsAuthenticated(true);
+          
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile) {
+            setUser({
+              id: profile.id,
+              username: profile.username,
+              name: profile.name,
+              email: profile.email,
+              role: profile.role,
+              rewardPoints: profile.reward_points,
+              avatarUrl: profile.avatar_url
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkUser();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Supabase authentication will be implemented here
-      toast({
-        title: "Not implemented",
-        description: "Please integrate Supabase first",
-        variant: "destructive",
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+
+      return;
     } catch (error: any) {
       toast({
         title: "Authentication error",
@@ -54,12 +139,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (email: string, password: string, userData: any) => {
     setLoading(true);
     try {
-      // Supabase registration will be implemented here
-      toast({
-        title: "Not implemented",
-        description: "Please integrate Supabase first",
-        variant: "destructive",
+      // Register with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: userData.name,
+            username: userData.username,
+            role: userData.role,
+            orgName: userData.orgName
+          }
+        }
       });
+
+      if (error) throw error;
+
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created.",
+      });
+
+      return;
     } catch (error: any) {
       toast({
         title: "Registration error",
@@ -74,9 +175,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      // Supabase logout will be implemented here
-      setUser(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       setIsAuthenticated(false);
+      setUser(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully.",
+      });
     } catch (error: any) {
       toast({
         title: "Logout error",
@@ -89,11 +197,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateUser = async (data: Partial<User>) => {
     if (!user) return;
     try {
-      // Supabase user update will be implemented here
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: data.name,
+          username: data.username,
+          email: data.email,
+          org_name: data.role === 'organizer' ? data.avatarUrl : null,
+          avatar_url: data.avatarUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update local user state
+      setUser({ ...user, ...data });
+      
       toast({
-        title: "Not implemented",
-        description: "Please integrate Supabase first",
-        variant: "destructive",
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
       });
     } catch (error: any) {
       toast({

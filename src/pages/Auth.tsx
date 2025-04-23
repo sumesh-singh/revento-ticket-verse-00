@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, Building, User as UserIcon, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Building, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -9,27 +10,72 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import AuthIllustration from '@/components/AuthIllustration';
 import { useAuth } from '@/context/AuthContext';
 import FormInput from '@/components/auth/FormInput';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 type UserRole = 'user' | 'organizer';
 type AuthMode = 'login' | 'signup' | 'forgot-password';
 
+type SignupFormValues = {
+  fullName: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  orgName?: string;
+  termsAccepted: boolean;
+};
+
+type LoginFormValues = {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+};
+
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, register: registerUser, isAuthenticated } = useAuth();
+  const { login, register: registerUser, isAuthenticated, loading } = useAuth();
   const [role, setRole] = useState<UserRole>('user');
   const [mode, setMode] = useState<AuthMode>('login');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [recoverOpen, setRecoverOpen] = useState(false);
   const [recoverEmail, setRecoverEmail] = useState("");
-  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
-  const watchPassword = watch("password", "");
+  // Login form
+  const loginForm = useForm<LoginFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false
+    }
+  });
+
+  // Signup form with validation
+  const signupForm = useForm<SignupFormValues>({
+    defaultValues: {
+      fullName: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      orgName: "",
+      termsAccepted: false
+    },
+  });
+  
+  const watchPassword = signupForm.watch("password", "");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -48,45 +94,53 @@ const Auth = () => {
 
   const toggleRole = (newRole: UserRole) => {
     setRole(newRole);
-    reset(); // Clear form when changing roles
+    loginForm.reset();
+    signupForm.reset();
   };
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+  
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordVisible(!confirmPasswordVisible);
+  };
 
-  const handleFormSubmit = async (data: any) => {
-    setIsFormSubmitting(true);
+  const handleLoginSubmit: SubmitHandler<LoginFormValues> = async (data) => {
+    try {
+      await login(data.email, data.password);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
+
+  const handleSignupSubmit: SubmitHandler<SignupFormValues> = async (data) => {
+    if (!data.termsAccepted) {
+      toast({
+        title: "Terms required",
+        description: "You must accept the Terms of Service and Privacy Policy.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      if (mode === 'login') {
-        await login(data.email, data.password);
-        
-        toast({
-          title: "Welcome back!",
-          description: `You have successfully logged in as a ${role}.`,
-        });
-        
-        navigate('/dashboard');
-      } else if (mode === 'signup') {
-        await registerUser(data.email, data.password, {
-          username: data.username,
-          name: data.fullName,
-          role: role,
-          orgName: role === 'organizer' ? data.orgName : undefined
-        });
-        
-        toast({
-          title: "Account created!",
-          description: `Your ${role} account has been created successfully.`,
-        });
-        
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      console.error('Authentication error:', error);
-    } finally {
-      setIsFormSubmitting(false);
+      await registerUser(data.email, data.password, {
+        name: data.fullName,
+        username: data.username,
+        role: role,
+        orgName: role === 'organizer' ? data.orgName : undefined
+      });
+      
+      toast({
+        title: "Account created!",
+        description: `Your ${role} account has been created successfully.`,
+      });
+      
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Registration error:', error);
     }
   };
 
@@ -168,209 +222,324 @@ const Auth = () => {
             
             <div className="mt-6">
               {mode === 'login' ? (
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
-                  <div className="space-y-4">
-                    <FormInput
-                      id="email"
-                      label="Email"
-                      placeholder="johndoe@example.com"
-                      error={errors.email?.message as string}
-                      {...register("email", { 
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-6 w-full animate-fade-in">
+                    <FormField
+                      control={loginForm.control}
+                      name="email"
+                      rules={{ 
                         required: "Email is required",
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                           message: "Invalid email address"
                         }
-                      })}
-                      icon={<Mail className="h-5 w-5 text-gray-400" />}
+                      }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field}
+                                placeholder="johndoe@example.com" 
+                                className="pl-10" 
+                              />
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                        </FormItem>
+                      )}
                     />
                     
-                    <FormInput
-                      id="password"
-                      label="Password"
-                      type={passwordVisible ? "text" : "password"}
-                      placeholder="••••••••"
-                      error={errors.password?.message as string}
-                      {...register("password", { 
-                        required: "Password is required",
-                        minLength: {
-                          value: 8,
-                          message: "Password must be at least 8 characters"
-                        }
-                      })}
-                      icon={passwordVisible ? 
-                        <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                        <Eye className="h-5 w-5 text-gray-400" />
-                      }
-                      onIconClick={togglePasswordVisibility}
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      rules={{ 
+                        required: "Password is required" 
+                      }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field}
+                                type={passwordVisible ? "text" : "password"}
+                                className="pl-10" 
+                                placeholder="••••••••"
+                              />
+                              <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                              >
+                                {passwordVisible ? 
+                                  <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                                  <Eye className="h-5 w-5 text-gray-400" />
+                                }
+                              </button>
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="remember" />
-                      <Label htmlFor="remember" className="text-sm">Remember me</Label>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="rememberMe" 
+                          {...loginForm.register("rememberMe")} 
+                        />
+                        <Label htmlFor="rememberMe" className="text-sm">Remember me</Label>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-sm"
+                        onClick={() => setRecoverOpen(true)}
+                      >
+                        Forgot password?
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="text-sm"
-                      onClick={() => setRecoverOpen(true)}
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                      disabled={loading}
                     >
-                      Forgot password?
+                      {loading ? "Logging in..." : "Login"}
                     </Button>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                    disabled={isFormSubmitting}
-                  >
-                    {isFormSubmitting ? "Logging in..." : "Login"}
-                  </Button>
-                  
-                  <div className="text-center text-sm animate-fade-in">
-                    Don't have an account?{" "}
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="p-0 hover:text-primary transition-colors"
-                      onClick={() => setMode('signup')}
-                    >
-                      Sign up
-                    </Button>
-                  </div>
-                </form>
+                    
+                    <div className="text-center text-sm animate-fade-in">
+                      Don't have an account?{" "}
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="p-0 hover:text-primary transition-colors"
+                        onClick={() => setMode('signup')}
+                      >
+                        Sign up
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               ) : (
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 w-full animate-fade-in">
-                  <div className="space-y-4">
-                    <FormInput
-                      id="fullName"
-                      label="Full Name"
-                      placeholder="John Doe"
-                      error={errors.fullName?.message as string}
-                      {...register("fullName", { required: "Full name is required" })}
-                      icon={<UserIcon className="h-5 w-5 text-gray-400" />}
+                <Form {...signupForm}>
+                  <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-6 w-full animate-fade-in">
+                    <FormField
+                      control={signupForm.control}
+                      name="fullName"
+                      rules={{ required: "Full name is required" }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field} 
+                                placeholder="John Doe" 
+                                className="pl-10" 
+                              />
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                        </FormItem>
+                      )}
                     />
                     
-                    <FormInput
-                      id="username"
-                      label="Username"
-                      placeholder="johndoe"
-                      error={errors.username?.message as string}
-                      {...register("username", { 
+                    <FormField
+                      control={signupForm.control}
+                      name="username"
+                      rules={{ 
                         required: "Username is required",
                         pattern: {
                           value: /^[a-zA-Z0-9_-]+$/,
                           message: "Username can only contain letters, numbers, underscores and dashes"
                         }
-                      })}
-                      icon={<UserIcon className="h-5 w-5 text-gray-400" />}
+                      }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field} 
+                                placeholder="johndoe" 
+                                className="pl-10" 
+                              />
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                        </FormItem>
+                      )}
                     />
                     
                     {role === 'organizer' && (
-                      <FormInput
-                        id="orgName"
-                        label="Organization Name"
-                        placeholder="Company or Institution Name"
-                        error={errors.orgName?.message as string}
-                        {...register("orgName", { 
+                      <FormField
+                        control={signupForm.control}
+                        name="orgName"
+                        rules={{ 
                           required: role === 'organizer' ? "Organization name is required" : false 
-                        })}
-                        icon={<Building className="h-5 w-5 text-gray-400" />}
+                        }}
+                        render={({ field, fieldState }) => (
+                          <FormItem>
+                            <FormLabel>Organization Name</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                <Input 
+                                  {...field} 
+                                  placeholder="Company or Institution Name" 
+                                  className="pl-10" 
+                                />
+                              </div>
+                            </FormControl>
+                            {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          </FormItem>
+                        )}
                       />
                     )}
                     
-                    <FormInput
-                      id="email"
-                      label="Email"
-                      type="email"
-                      placeholder="your@email.com"
-                      error={errors.email?.message as string}
-                      {...register("email", { 
+                    <FormField
+                      control={signupForm.control}
+                      name="email"
+                      rules={{ 
                         required: "Email is required",
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                           message: "Invalid email address"
                         }
-                      })}
-                      icon={<Mail className="h-5 w-5 text-gray-400" />}
+                      }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field} 
+                                placeholder="your@email.com" 
+                                className="pl-10" 
+                              />
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                        </FormItem>
+                      )}
                     />
                     
-                    <div className="space-y-2">
-                      <FormInput
-                        id="password"
-                        label="Password"
-                        type={passwordVisible ? "text" : "password"}
-                        placeholder="••••••••"
-                        error={errors.password?.message as string}
-                        {...register("password", { 
-                          required: "Password is required",
-                          minLength: {
-                            value: 8,
-                            message: "Password must be at least 8 characters"
-                          }
-                        })}
-                        icon={passwordVisible ? 
-                          <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                          <Eye className="h-5 w-5 text-gray-400" />
+                    <FormField
+                      control={signupForm.control}
+                      name="password"
+                      rules={{ 
+                        required: "Password is required",
+                        minLength: {
+                          value: 8,
+                          message: "Password must be at least 8 characters"
                         }
-                        onIconClick={togglePasswordVisibility}
+                      }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field} 
+                                type={passwordVisible ? "text" : "password"}
+                                placeholder="••••••••" 
+                                className="pl-10" 
+                              />
+                              <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                              >
+                                {passwordVisible ? 
+                                  <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                                  <Eye className="h-5 w-5 text-gray-400" />
+                                }
+                              </button>
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                          <PasswordStrengthMeter password={watchPassword} />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={signupForm.control}
+                      name="confirmPassword"
+                      rules={{ 
+                        required: "Please confirm your password",
+                        validate: value => value === watchPassword || "Passwords do not match"
+                      }}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <Input 
+                                {...field} 
+                                type={confirmPasswordVisible ? "text" : "password"}
+                                placeholder="••••••••" 
+                                className="pl-10" 
+                              />
+                              <button
+                                type="button"
+                                onClick={toggleConfirmPasswordVisibility}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                              >
+                                {confirmPasswordVisible ? 
+                                  <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                                  <Eye className="h-5 w-5 text-gray-400" />
+                                }
+                              </button>
+                            </div>
+                          </FormControl>
+                          {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="termsAccepted"
+                        {...signupForm.register("termsAccepted")}
                       />
-                      <PasswordStrengthMeter password={watchPassword} />
+                      <Label htmlFor="termsAccepted" className="text-sm">
+                        I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+                      </Label>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          id="confirmPassword"
-                          type="password"
-                          placeholder="••••••••"
-                          className="pl-10"
-                          {...register("confirmPassword", { 
-                            required: "Please confirm your password",
-                            validate: value => value === watchPassword || "Passwords do not match"
-                          })}
-                        />
-                      </div>
-                      {errors.confirmPassword && (
-                        <p className="text-sm text-red-500 flex items-center mt-1">
-                          <AlertTriangle className="h-4 w-4 mr-1" />
-                          {errors.confirmPassword.message as string}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" />
-                    <Label htmlFor="terms" className="text-sm">
-                      I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
-                    </Label>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                    disabled={isFormSubmitting}
-                  >
-                    {isFormSubmitting ? "Creating Account..." : "Create Account"}
-                  </Button>
-                  
-                  <div className="text-center text-sm animate-fade-in">
-                    Already have an account?{" "}
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="p-0 hover:text-primary transition-colors"
-                      onClick={() => setMode('login')}
+                    <Button 
+                      type="submit" 
+                      className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                      disabled={loading}
                     >
-                      Log in
+                      {loading ? "Creating Account..." : "Create Account"}
                     </Button>
-                  </div>
-                </form>
+                    
+                    <div className="text-center text-sm animate-fade-in">
+                      Already have an account?{" "}
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="p-0 hover:text-primary transition-colors"
+                        onClick={() => setMode('login')}
+                      >
+                        Log in
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               )}
             </div>
             
