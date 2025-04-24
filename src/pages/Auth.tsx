@@ -93,9 +93,11 @@ const Auth = () => {
   }, [location]);
 
   const toggleRole = (newRole: UserRole) => {
-    setRole(newRole);
-    loginForm.reset();
-    signupForm.reset();
+    if (newRole) {
+      setRole(newRole);
+      loginForm.reset();
+      signupForm.reset();
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -184,41 +186,39 @@ const Auth = () => {
               </p>
             </div>
             
-            {(mode === 'login' || mode === 'signup') && (
-              <div className="role-switch p-1 rounded-full flex">
-                <ToggleGroup 
-                  type="single" 
-                  value={role} 
-                  onValueChange={(value) => value && toggleRole(value as UserRole)}
-                  className="w-full"
+            <div className="role-switch p-1 rounded-full flex">
+              <ToggleGroup 
+                type="single" 
+                value={role} 
+                onValueChange={(value) => value && toggleRole(value as UserRole)}
+                className="w-full bg-slate-100 rounded-full transition-all"
+              >
+                <ToggleGroupItem 
+                  value="user" 
+                  className={`w-1/2 rounded-full transition-all duration-300 ${
+                    role === 'user' 
+                      ? 'bg-white text-primary shadow-sm transform scale-105' 
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  }`}
+                  aria-label="Toggle User role"
                 >
-                  <ToggleGroupItem 
-                    value="user" 
-                    className={`w-1/2 rounded-full transition-all ${
-                      role === 'user' 
-                        ? 'bg-white text-primary shadow-sm' 
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
-                    }`}
-                    aria-label="Toggle User role"
-                  >
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    User
-                  </ToggleGroupItem>
-                  <ToggleGroupItem 
-                    value="organizer" 
-                    className={`w-1/2 rounded-full transition-all ${
-                      role === 'organizer' 
-                        ? 'bg-white text-primary shadow-sm' 
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
-                    }`}
-                    aria-label="Toggle Organizer role"
-                  >
-                    <Building className="mr-2 h-4 w-4" />
-                    Organizer
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            )}
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  User
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="organizer" 
+                  className={`w-1/2 rounded-full transition-all duration-300 ${
+                    role === 'organizer' 
+                      ? 'bg-white text-primary shadow-sm transform scale-105' 
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  }`}
+                  aria-label="Toggle Organizer role"
+                >
+                  <Building className="mr-2 h-4 w-4" />
+                  Organizer
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
             
             <div className="mt-6">
               {mode === 'login' ? (
@@ -289,9 +289,16 @@ const Auth = () => {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="rememberMe" 
-                          {...loginForm.register("rememberMe")} 
+                        <Controller
+                          control={loginForm.control}
+                          name="rememberMe"
+                          render={({ field }) => (
+                            <Checkbox 
+                              id="rememberMe" 
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          )}
                         />
                         <Label htmlFor="rememberMe" className="text-sm">Remember me</Label>
                       </div>
@@ -341,6 +348,7 @@ const Auth = () => {
                               <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
                                 {...field}
+                                type="text"
                                 placeholder="John Doe" 
                                 className="pl-10" 
                               />
@@ -369,6 +377,7 @@ const Auth = () => {
                               <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
                                 {...field}
+                                type="text"
                                 placeholder="johndoe" 
                                 className="pl-10" 
                               />
@@ -394,6 +403,7 @@ const Auth = () => {
                                 <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                 <Input 
                                   {...field}
+                                  type="text"
                                   placeholder="Company or Institution Name" 
                                   className="pl-10" 
                                 />
@@ -423,6 +433,7 @@ const Auth = () => {
                               <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                               <Input 
                                 {...field}
+                                type="email"
                                 placeholder="your@email.com" 
                                 className="pl-10" 
                               />
