@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { PaymentDetails } from '@/types';
@@ -6,17 +5,17 @@ import { PaymentDetails } from '@/types';
 // User related operations
 export const createUserProfile = async (userId: string, userData: any) => {
   try {
-    console.log('Creating user profile:', { userId, userData });
+    console.log('Creating user profile with ID:', userId, 'and data:', userData);
     
     // First check if profile already exists
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to prevent errors
     
     if (existingProfile) {
-      console.log('Profile already exists, updating instead');
+      console.log('Profile already exists for user', userId, 'updating instead');
       return updateUserProfile(userId, userData);
     }
     
@@ -25,8 +24,8 @@ export const createUserProfile = async (userId: string, userData: any) => {
       .from('profiles')
       .insert([{
         id: userId,
-        username: userData.username,
-        name: userData.name,
+        username: userData.username || `user_${Date.now()}`, // Fallback username
+        name: userData.name || 'User',
         email: userData.email,
         role: userData.role || 'user',
         org_name: userData.org_name || null,
@@ -37,7 +36,7 @@ export const createUserProfile = async (userId: string, userData: any) => {
       .select();
 
     if (error) {
-      console.error('Error creating user profile:', error);
+      console.error('Database error creating profile:', error);
       throw error;
     }
     
@@ -45,7 +44,7 @@ export const createUserProfile = async (userId: string, userData: any) => {
     return { success: true, data: data[0] };
   } catch (error: any) {
     console.error('Error in createUserProfile:', error.message, error);
-    return { success: false, error: error.message };
+    return { success: false, error: error.message || 'Unknown error creating profile' };
   }
 };
 
@@ -71,18 +70,23 @@ export const getUserProfile = async (userId: string) => {
 
 export const updateUserProfile = async (userId: string, userData: any) => {
   try {
-    console.log('Updating user profile:', { userId, userData });
+    console.log('Updating user profile for ID:', userId, 'with data:', userData);
     
-    const updateData = {
-      name: userData.name,
-      username: userData.username,
-      email: userData.email,
+    const updateData: Record<string, any> = {
       updated_at: new Date().toISOString()
     };
     
-    // Only add org_name if it exists and user is organizer
-    if (userData.role === 'organizer') {
-      updateData['org_name'] = userData.org_name || userData.orgName || null;
+    // Only update fields that are provided
+    if (userData.name) updateData.name = userData.name;
+    if (userData.username) updateData.username = userData.username;
+    if (userData.email) updateData.email = userData.email;
+    
+    if (userData.role === 'organizer' && userData.org_name) {
+      updateData.org_name = userData.org_name;
+    }
+    
+    if (userData.avatar_url) {
+      updateData.avatar_url = userData.avatar_url;
     }
     
     const { data, error } = await supabase
@@ -99,7 +103,7 @@ export const updateUserProfile = async (userId: string, userData: any) => {
     console.log('Profile updated successfully:', data);
     return { success: true, data: data[0] };
   } catch (error: any) {
-    console.error('Error updating user profile:', error);
+    console.error('Error in updateUserProfile:', error);
     return { success: false, error: error.message };
   }
 };
