@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button'; // Added Button import
+import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import AuthLayout from '@/components/auth/AuthLayout';
@@ -81,12 +81,16 @@ const Auth = () => {
     }
     
     try {
-      await registerUser(data.email, data.password, {
+      const userData = {
         name: data.fullName,
         username: data.username,
         role: role,
         orgName: role === 'organizer' ? data.orgName : undefined
-      });
+      };
+      
+      console.log('Signup data:', { email: data.email, userData });
+      
+      await registerUser(data.email, data.password, userData);
       
       toast({
         title: "Account created!",
@@ -96,6 +100,12 @@ const Auth = () => {
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Registration error:', error);
+      
+      toast({
+        title: "Registration error",
+        description: error.message || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

@@ -46,14 +46,20 @@ const SignupForm = ({ onSubmit, onSwitchMode, loading, role }: SignupFormProps) 
       confirmPassword: "",
       orgName: "",
       termsAccepted: false
-    }
+    },
+    mode: "onChange"
   });
 
   const watchPassword = form.watch("password", "");
 
+  const handleSubmit = async (data: SignupFormValues) => {
+    console.log("Form submitted with data:", data);
+    await onSubmit(data);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full animate-fade-in">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full animate-fade-in">
         <FormField
           control={form.control}
           name="fullName"
@@ -280,4 +286,3 @@ const SignupForm = ({ onSubmit, onSwitchMode, loading, role }: SignupFormProps) 
 };
 
 export default SignupForm;
-

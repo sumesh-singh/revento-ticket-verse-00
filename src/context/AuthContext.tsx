@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { createUserProfile } from '@/services/SupabaseService';
 
 export type User = {
   id: string;
@@ -139,6 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (email: string, password: string, userData: any) => {
     setLoading(true);
     try {
+      console.log('Registration data:', { email, userData });
+      
       // Register with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -154,6 +157,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) throw error;
+      
+      if (!data.user) {
+        throw new Error("User registration failed");
+      }
+      
+      // Create user profile explicitly
+      const profileData = {
+        id: data.user.id,
+        username: userData.username,
+        name: userData.name,
+        email: email,
+        role: userData.role,
+        org_name: userData.orgName
+      };
+      
+      // Create user profile in our profiles table
+      const { success, error: profileError } = await createUserProfile(data.user.id, profileData);
+      
+      if (!success) {
+        throw new Error(profileError || "Failed to create user profile");
+      }
 
       toast({
         title: "Registration successful",
@@ -162,6 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return;
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: "Registration error",
         description: error.message,

@@ -5,6 +5,21 @@ import { PaymentDetails } from '@/types';
 // User related operations
 export const createUserProfile = async (userId: string, userData: any) => {
   try {
+    console.log('Creating user profile:', { userId, userData });
+    
+    // First check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (existingProfile) {
+      console.log('Profile already exists, updating instead');
+      return updateUserProfile(userId, userData);
+    }
+    
+    // Create new profile
     const { data, error } = await supabase
       .from('profiles')
       .insert([{
@@ -13,14 +28,17 @@ export const createUserProfile = async (userId: string, userData: any) => {
         name: userData.name,
         email: userData.email,
         role: userData.role || 'user',
-        org_name: userData.orgName
+        org_name: userData.orgName || userData.org_name
       }])
-      .select()
-      .single();
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating user profile:', error);
+      throw error;
+    }
     
-    return { success: true, data };
+    console.log('Profile created successfully:', data);
+    return { success: true, data: data[0] };
   } catch (error: any) {
     console.error('Error creating user profile:', error);
     return { success: false, error: error.message };
@@ -33,10 +51,12 @@ export const getUserProfile = async (userId: string) => {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();  // Use maybeSingle instead of single to handle non-existent profiles
 
     if (error) throw error;
-    if (!data) throw new Error('Profile not found');
+    if (!data) {
+      return { success: false, error: 'Profile not found' };
+    }
 
     return { success: true, data };
   } catch (error: any) {
@@ -47,22 +67,27 @@ export const getUserProfile = async (userId: string) => {
 
 export const updateUserProfile = async (userId: string, userData: any) => {
   try {
+    console.log('Updating user profile:', { userId, userData });
+    
     const { data, error } = await supabase
       .from('profiles')
       .update({
         name: userData.name,
         username: userData.username,
         email: userData.email,
-        org_name: userData.orgName,
+        org_name: userData.orgName || userData.org_name,
         updated_at: new Date().toISOString()
       })
       .eq('id', userId)
-      .select()
-      .single();
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
     
-    return { success: true, data };
+    console.log('Profile updated successfully:', data);
+    return { success: true, data: data[0] };
   } catch (error: any) {
     console.error('Error updating user profile:', error);
     return { success: false, error: error.message };
