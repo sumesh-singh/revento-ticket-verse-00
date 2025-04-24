@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { PaymentDetails } from '@/types';
@@ -19,7 +20,7 @@ export const createUserProfile = async (userId: string, userData: any) => {
       return updateUserProfile(userId, userData);
     }
     
-    // Create new profile
+    // Create new profile with careful error handling
     const { data, error } = await supabase
       .from('profiles')
       .insert([{
@@ -28,7 +29,10 @@ export const createUserProfile = async (userId: string, userData: any) => {
         name: userData.name,
         email: userData.email,
         role: userData.role || 'user',
-        org_name: userData.orgName || userData.org_name
+        org_name: userData.org_name || null,
+        reward_points: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }])
       .select();
 
@@ -40,7 +44,7 @@ export const createUserProfile = async (userId: string, userData: any) => {
     console.log('Profile created successfully:', data);
     return { success: true, data: data[0] };
   } catch (error: any) {
-    console.error('Error creating user profile:', error);
+    console.error('Error in createUserProfile:', error.message, error);
     return { success: false, error: error.message };
   }
 };
@@ -69,15 +73,21 @@ export const updateUserProfile = async (userId: string, userData: any) => {
   try {
     console.log('Updating user profile:', { userId, userData });
     
+    const updateData = {
+      name: userData.name,
+      username: userData.username,
+      email: userData.email,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Only add org_name if it exists and user is organizer
+    if (userData.role === 'organizer') {
+      updateData['org_name'] = userData.org_name || userData.orgName || null;
+    }
+    
     const { data, error } = await supabase
       .from('profiles')
-      .update({
-        name: userData.name,
-        username: userData.username,
-        email: userData.email,
-        org_name: userData.orgName || userData.org_name,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', userId)
       .select();
 

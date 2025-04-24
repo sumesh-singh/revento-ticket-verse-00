@@ -152,7 +152,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             username: userData.username,
             role: userData.role,
             orgName: userData.orgName
-          }
+          },
+          // Ensure email confirmation is not required for testing
+          emailRedirectTo: window.location.origin + '/auth'
         }
       });
 
@@ -161,23 +163,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!data.user) {
         throw new Error("User registration failed");
       }
+
+      console.log('Auth signup successful, now creating profile for user:', data.user.id);
       
-      // Create user profile explicitly
+      // Create user profile explicitly with proper data mapping
       const profileData = {
         id: data.user.id,
         username: userData.username,
         name: userData.name,
         email: email,
         role: userData.role,
-        org_name: userData.orgName
+        org_name: userData.orgName || null
       };
       
       // Create user profile in our profiles table
-      const { success, error: profileError } = await createUserProfile(data.user.id, profileData);
+      const profileResult = await createUserProfile(data.user.id, profileData);
       
-      if (!success) {
-        throw new Error(profileError || "Failed to create user profile");
+      if (!profileResult.success) {
+        console.error('Failed to create profile:', profileResult.error);
+        throw new Error(profileResult.error || "Failed to create user profile");
       }
+
+      console.log('Profile created successfully:', profileResult.data);
 
       toast({
         title: "Registration successful",

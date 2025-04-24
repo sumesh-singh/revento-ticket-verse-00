@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import {
   Form,
@@ -31,9 +32,16 @@ interface SignupFormProps {
   onSwitchMode: () => void;
   loading: boolean;
   role: 'user' | 'organizer';
+  errorMessage?: string;
 }
 
-const SignupForm = ({ onSubmit, onSwitchMode, loading, role }: SignupFormProps) => {
+const SignupForm = ({ 
+  onSubmit, 
+  onSwitchMode, 
+  loading, 
+  role,
+  errorMessage 
+}: SignupFormProps) => {
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = React.useState(false);
   
@@ -60,6 +68,12 @@ const SignupForm = ({ onSubmit, onSwitchMode, loading, role }: SignupFormProps) 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full animate-fade-in">
+        {errorMessage && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
         <FormField
           control={form.control}
           name="fullName"

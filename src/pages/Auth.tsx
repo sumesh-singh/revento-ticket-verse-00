@@ -39,6 +39,7 @@ const Auth = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [recoverOpen, setRecoverOpen] = useState(false);
   const [recoverEmail, setRecoverEmail] = useState("");
+  const [signupError, setSignupError] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -71,6 +72,8 @@ const Auth = () => {
   };
 
   const handleSignupSubmit = async (data: SignupFormValues) => {
+    setSignupError("");
+    
     if (!data.termsAccepted) {
       toast({
         title: "Terms required",
@@ -81,6 +84,9 @@ const Auth = () => {
     }
     
     try {
+      // Clear any previous errors
+      setSignupError("");
+      
       const userData = {
         name: data.fullName,
         username: data.username,
@@ -97,9 +103,12 @@ const Auth = () => {
         description: `Your ${role} account has been created successfully.`,
       });
       
-      navigate('/dashboard');
+      // Redirect will happen automatically via the useEffect since isAuthenticated will be true
     } catch (error: any) {
       console.error('Registration error:', error);
+      
+      // Set specific error state for the component
+      setSignupError(error.message || "Failed to create account");
       
       toast({
         title: "Registration error",
@@ -149,6 +158,7 @@ const Auth = () => {
               onSwitchMode={() => setMode('login')}
               loading={loading}
               role={role}
+              errorMessage={signupError}
             />
           )}
         </div>
