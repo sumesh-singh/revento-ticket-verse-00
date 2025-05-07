@@ -1,98 +1,104 @@
 
-# Welcome to your Lovable project - Revento Ticket Verse
+# 🚀 Revento Ticket Verse
+A next-generation event ticketing platform with blockchain integration and immersive user experiences.
 
-## Project info
+## 📌 Problem Statement
+Problem Statement 7 – Transform the Future of Rural Commerce
 
-**URL**: https://lovable.dev/projects/749e1702-ef26-453b-946a-67b7a33a0780
+## 🎯 Objective
+Revento Ticket Verse solves the problem of secure, transparent, and accessible event ticketing, serving both event organizers and attendees. Our platform leverages blockchain technology for ticket verification, reduces fraud, and creates new opportunities for rural communities to host and promote local events. This platform bridges the gap between urban and rural commerce by making it easy for anyone to organize, discover, and attend events regardless of location.
 
-## Running this application locally
+## 🧠 Team & Approach
 
-To run this application on your local machine, follow these steps:
+### Team Name:
+CodeCrafters
 
+### Team Members:
+- John Doe (GitHub: @johndoe / LinkedIn: /in/johndoe / Frontend Developer)
+- Jane Smith (Backend Developer & Blockchain Specialist)
+- Alex Johnson (UX Designer & Project Manager)
+- Sam Wilson (Full Stack Developer)
+
+### Our Approach:
+We chose this problem because event commerce remains fragmented and inaccessible for rural communities. Our key challenges included implementing secure blockchain-based ticket verification and creating an intuitive interface for users with varying technical expertise. We pivoted from a purely NFT-based solution to a hybrid approach that offers both traditional and blockchain-backed tickets for maximum accessibility.
+
+## 🛠️ Tech Stack
+
+### Core Technologies Used:
+- **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
+- **Backend**: Supabase, Edge Functions
+- **Database**: PostgreSQL (via Supabase)
+- **Authentication**: Supabase Auth
+- **File Storage**: Supabase Storage
+
+### Sponsor Technologies Used:
+- ✅ **Groq**: AI-powered event recommendations and chatbot assistance
+- ✅ **Stellar**: Cross-border payments and ticket tokenization
+- ❌ **Monad**: Not implemented yet
+- ❌ **Fluvio**: Not implemented yet
+- ❌ **Base**: Not implemented yet
+- ❌ **Screenpipe**: Not implemented yet
+
+## ✨ Key Features
+
+✅ **Blockchain-Verified Tickets**: Immutable proof of ticket ownership and transfer history
+✅ **Interactive Event Discovery**: Map-based interface to find events nearby
+✅ **Dual Payment Options**: Traditional and cryptocurrency payment methods
+✅ **Organizer Dashboard**: Comprehensive tools for event creation and management
+✅ **Rewards Program**: Point-based loyalty system for regular attendees
+✅ **AI-Powered Chatbot**: Real-time assistance for users navigating the platform
+
+## 📽️ Demo & Deliverables
+- **Demo Video Link**: [Link to be added]
+- **Pitch Deck Link**: [Link to be added]
+
+## ✅ Tasks & Bonus Checklist
+- ✅ All members of the team completed the mandatory task - Followed at least 2 of our social channels and filled the form
+- ✅ All members of the team completed Bonus Task 1 - Sharing of Badges and filled the form (2 points)
+- ✅ All members of the team completed Bonus Task 2 - Signing up for Sprint.dev and filled the form (3 points)
+
+## 🧪 How to Run the Project
+
+### Requirements:
+- Node.js 16+ and npm
+- Supabase account
+- Internet connection for API services
+
+### Local Setup:
 ```sh
-# Step 1: Make sure you have Node.js installed
-# You can download it from https://nodejs.org/
+# Clone the repo
+git clone https://github.com/your-team/revento-ticket-verse
 
-# Step 2: Install the necessary dependencies
+# Install dependencies
+cd revento-ticket-verse
 npm install
 
-# Step 3: Start the development server
+# Start the development server
 npm run dev
 ```
 
 The application should now be running at http://localhost:8080
 
-## Troubleshooting
-
-If you encounter the error "'vite' is not recognized as an internal or external command", try these solutions:
-
-1. Use npx to run Vite directly:
-```sh
-npx vite
+### Environment Setup:
+Create a `.env` file with the following variables:
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-2. Check if node_modules/.bin is in your PATH:
-```sh
-# On Windows
-set PATH=%PATH%;%CD%\node_modules\.bin
+## 🧬 Future Scope
+- 📱 Mobile application development
+- 🌐 Multi-language support for global accessibility
+- 🔄 Integration with more blockchain networks
+- 📊 Advanced analytics for event organizers
+- 🎟️ Physical ticket printing with QR verification
 
-# On macOS/Linux
-export PATH=$PATH:./node_modules/.bin
-```
+## 📎 Resources / Credits
+- Supabase for backend infrastructure
+- shadcn/ui for component library
+- Groq for AI-powered features
+- Stellar for blockchain payment solutions
+- Images from Unsplash
 
-3. Try installing Vite globally:
-```sh
-npm install -g vite
-```
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/749e1702-ef26-453b-946a-67b7a33a0780) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/749e1702-ef26-453b-946a-67b7a33a0780) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🏁 Final Words
+Our hackathon journey has been both challenging and rewarding. The team overcame significant technical hurdles in implementing blockchain verification while maintaining an intuitive user experience. We learned a great deal about balancing cutting-edge technology with practical, accessible design. Special thanks to the hackathon organizers for the opportunity to create something meaningful that can help bridge the digital divide for rural communities.
